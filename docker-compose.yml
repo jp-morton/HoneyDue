@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   frontend:
+    container_name: frontend
     build:
       context: ./frontend
     ports:
@@ -10,18 +11,19 @@ services:
       - backend
 
   backend:
+    container_name: backend
     build:
       context: ./backend
     ports:
       - "8000:8000"
-    depends_on:
-      - database
+  #   depends_on:
+  #     - database
 
-  database:
-    build:
-      context: ./database
-    environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: YourStrong!Passw0rd
-    ports:
-      - "1433:1433"
+  # database:
+  #   build:
+  #     context: ./database
+  #   environment:
+  #     ACCEPT_EULA: Y
+  #     SA_PASSWORD: YourStrong!Passw0rd
+  #   ports:
+  #     - "1433:1433"
