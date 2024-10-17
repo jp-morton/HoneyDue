@@ -15,7 +15,7 @@ to keep installed dependecies installed in the proper locations without affectin
     > sudo apt install python3.10-venv
 
 3. Activate the virutal environment
-    > source .venv/bin/Activate
+    > source .venv/bin/activate
 
 Your virtual environment should now be properly configured. 
 
