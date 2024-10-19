@@ -6,7 +6,7 @@ import uvicorn
 app = FastAPI()
 
 # Dummy user data for authentication
-users_db = {
+users = {
     "user1": "password1",
     "user2": "password2"
 }
@@ -23,25 +23,11 @@ class User(BaseModel):
 class Task(BaseModel):
     task: str
 
-
-# Sign up route
-@app.post("/signup")
-def signup(user: User):
-    if user.username in users_db:
-        raise HTTPException(status_code=400, detail="Username already exists")
-    
-    # Hash the password and store the user
-    # hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
-    # users_db[user.username] = hashed_password
-    users_db[user.username] = user.password
-    return {"message": "User created successfully"}
-
-
 # Post to "login" API endpoint
 @app.post("/login")
 def login(user: User):
     # If the username exists AND the password is valid login
-    if user.username in users_db and users_db[user.username] == user.password:
+    if user.username in users and users[user.username] == user.password:
         return {"message": "Login successful"}
     raise HTTPException(status_code=400, detail="Invalid username or password")
 

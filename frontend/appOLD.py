@@ -38,11 +38,6 @@ def display_login():
             st.rerun()
         else:
             st.error("Invalid username or password")
-    
-    # Add "Back" button to return to home page
-    if st.button("Back"):
-        st.session_state.page = "home"
-        st.rerun()
 
 # Function to display signup form and handle account creation
 def display_signup():
@@ -55,11 +50,6 @@ def display_signup():
             st.success("Account created successfully! Please log in.")
         else:
             st.error("Username already exists or invalid input.")
-    
-    # Add "Back" button to return to home page
-    if st.button("Back"):
-        st.session_state.page = "home"
-        st.rerun()
 
 # Function to display tasks and add new tasks
 def display_tasks():
