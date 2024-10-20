@@ -26,7 +26,8 @@ def main():
 
         # If login pressed, log the user in 
         if st.button("Login"):
-            if login(username, password):
+            # if login(username, password):
+            if requests.post(f"{API_URL}/login", json={"username": username, "password": password}).ok:
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.rerun()
@@ -46,25 +47,29 @@ def main():
         if "tasks" not in st.session_state:
             st.session_state.tasks = []
         with col1:
-            task = st.text_input("Enter a new task")
+            task_name = st.text_input("Enter a new task")
+            
             if st.button("Add Task"):
-                if task:
-                    requests.post(f"{API_URL}/tasks/{st.session_state.username}", json={"task": task})
-                    st.session_state.tasks.append(task)
-                    st.rerun()
-                    st.success(f'Task "{task}" added!')
+                if task_name:
+                    response = requests.post(f"{API_URL}/tasks/{st.session_state.username}", params={"username": st.session_state.username, "task_name": task_name})
+                    if response.status_code == 200:
+                        st.rerun()
+                        st.success(f'Task "{task_name}" added!')
+                    else:
+                        st.error(f"Error: {response.text}")
                 else:
                     st.error("Please enter a task.")
 
             # Fetch tasks
-            if st.session_state.tasks == []:
-                response = requests.get(f"{API_URL}/tasks/{st.session_state.username}")
-                st.session_state.tasks = response.json()
-
-            # Display task list as enumeration
-            st.subheader("Your Tasks")
-            for idx, task in enumerate(st.session_state.tasks):
-                st.write(f"{idx + 1}. {task}")
+            st.subheader("Your Tasking")
+            
+            response = requests.get(f"{API_URL}/tasks/{st.session_state.username}", json={"username": st.session_state.username})
+            if response.status_code == 200:
+                task_list = response.json()
+                i = 1
+                for task in task_list:
+                    st.write(f"{i}. {task['name']}")
+                    i = i + 1
 
         # COL2 OF TASKS PAGE
         with col2:
