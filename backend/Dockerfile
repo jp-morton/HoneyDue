@@ -9,8 +9,8 @@ COPY requirements.txt .
 #  Pip install the requirements inside the container
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy main into the container inside of the current working directory (/app)
-COPY main.py .
+# Copy the current directory into the container inside of the current working directory (/app)
+COPY . .
 
 # Upon docker container spin up, instantiate the API hosted on 0.0.0.0:8000
 ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

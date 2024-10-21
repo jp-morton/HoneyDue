@@ -12,14 +12,27 @@ from temp_database.data_utilities import Utilities
 
 app = FastAPI()
 
+
+# Sign up route
+@app.post("/signup")
+def signup(username: str, password: str):
+    if Utilities.find_username(username):
+        raise HTTPException(status_code=400, detail="Username already exists")
+    if Utilities.find_password(password):
+        raise HTTPException(status_code=400, detail="Password already exists")
+    # Hash the password and store the user
+    # hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
+    # users_db[user.username] = hashed_password
+    Utilities.add_user(username, password)
+    # users_db[user.username] = user.password
+    return {"message": "User created successfully"}
+
+
 # Post to "login" API endpoint
 @app.post("/login")
-async def login(request: Request):
-    data = await request.json()
-    username = data.get("username")
-    password = data.get("password")
+async def login(username: str, password: str):
     # If the username exists AND the password is valid login
-    if Utilities.verify_username_and_password(username, password):
+    if Utilities.find_username_and_password(username, password):
         return {"message": "Login successful"}
     raise HTTPException(status_code=400, detail="Invalid username or password")
 
