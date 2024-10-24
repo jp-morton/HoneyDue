@@ -5,24 +5,24 @@ API_URL = "http://backend:8000"
 
 # Helper function to handle user login
 def login(username, password):
-    response = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
+    response = requests.post(f"{API_URL}/login", params={"username": username, "password": password})
     return response.ok
 
 # Helper function to handle user signup
 def signup(username, password):
-    response = requests.post(f"{API_URL}/signup", json={"username": username, "password": password})
+    response = requests.post(f"{API_URL}/signup", params={"username": username, "password": password})
     return response.ok
 
 # Helper function to fetch user tasks
 def fetch_tasks(username):
-    response = requests.get(f"{API_URL}/tasks/{username}")
+    response = requests.get(f"{API_URL}/tasks/{username}", params={"username": username})
     if response.ok:
         return response.json()
     return []
 
 # Helper function to add a new task
-def add_task(username, task):
-    requests.post(f"{API_URL}/tasks/{username}", json={"task": task})
+def add_task(username, task_name):
+    requests.post(f"{API_URL}/tasks/{username}", params={"username": username, "task_name": task_name})
 
 # Function to display login form and handle login logic
 def display_login():
@@ -31,11 +31,12 @@ def display_login():
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
-        if login(username, password):
+        # if login(username, password):
+        if requests.post(f"{API_URL}/login", params={"username": username, "password": password}).ok:
             st.session_state.logged_in = True
             st.session_state.username = username
-            st.session_state.tasks = fetch_tasks(username)  # Fetch tasks upon login
             st.rerun()
+            st.success("Logged in successfully!")
         else:
             st.error("Invalid username or password")
     
@@ -54,7 +55,7 @@ def display_signup():
         if signup(username, password):
             st.success("Account created successfully! Please log in.")
         else:
-            st.error("Username already exists or invalid input.")
+            st.error("Username or Password already exists or invalid input.")
     
     # Add "Back" button to return to home page
     if st.button("Back"):
@@ -66,21 +67,33 @@ def display_tasks():
     st.subheader(f"Welcome, {st.session_state.username}")
     col1, col2 = st.columns([3, 1])
 
-    # COL1: Task input and display
+    # COL1 OF TASKS PAGE
+    if "tasks" not in st.session_state:
+        st.session_state.tasks = []
     with col1:
-        task = st.text_input("Enter a new task")
+        task_name = st.text_input("Enter a new task")
+            
         if st.button("Add Task"):
-            if task:
-                add_task(st.session_state.username, task)
-                st.session_state.tasks.append(task)
-                st.rerun()
+            if task_name:
+                response = requests.post(f"{API_URL}/tasks/{st.session_state.username}", params={"username": st.session_state.username, "task_name": task_name})
+                if response.status_code == 200:
+                    st.rerun()
+                    st.success(f'Task "{task_name}" added!')
+                else:
+                    st.error(f"Error: {response.text}")
             else:
                 st.error("Please enter a task.")
 
-        # Display task list
+        # Fetch tasks
         st.subheader("Your Tasks")
-        for idx, task in enumerate(st.session_state.tasks):
-            st.write(f"{idx + 1}. {task}")
+            
+        response = requests.get(f"{API_URL}/tasks/{st.session_state.username}", params={"username": st.session_state.username})
+        if response.status_code == 200:
+            task_list = response.json()
+            i = 1
+            for task in task_list:
+                st.write(f"{i}. {task['name']}")
+                i = i + 1
 
     # COL2: Logout button
     with col2:
