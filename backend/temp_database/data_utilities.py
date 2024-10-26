@@ -12,14 +12,14 @@ class Utilities:
     ### USER FUNCTIONS ###
     ######################
 
-    # Name: find_username
+    # Name: username_exists
     # Description: Searches the account data to see if a username has been used
     # Input: 
     #   username: The username being searched for
     # Output:
     #   True if the username is found
     #   False if the username is not found
-    def find_username(username: str):
+    def username_exists(username: str):
         with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 user_group = account_data[user]
@@ -27,14 +27,14 @@ class Utilities:
                     return True
             return False
 
-    # Name: find_password
+    # Name: password_exists
     # Description: Searches the account data to see if a password has been used
     # Input: 
     #   password: The password being searched for
     # Output:
     #   True if the password is found
     #   False if the password is not found
-    def find_password(password: str):
+    def password_exists(password: str):
         with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 user_group = account_data[user]
@@ -42,7 +42,7 @@ class Utilities:
                     return True
             return False
 
-    # Name: find_username_and_password
+    # Name: account_exists
     # Description: Searches the account data to see if an account exists 
     # Input: 
     #   username: The username of the account being searched for
@@ -50,7 +50,7 @@ class Utilities:
     # Output:
     #   True if the account is found
     #   False if the account is not found
-    def find_username_and_password(username: str, password: str):
+    def account_exists(username: str, password: str):
         with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 user_group = account_data[user]
@@ -90,13 +90,13 @@ class Utilities:
                     project_dataset.resize(project_dataset.shape[0] + 1, axis=0)
                     project_dataset[-1] = encoded_project
 
-    # Name: get_projects
+    # Name: get_project_list
     # Description: Retrieve the list of projects for a particular user
     # Input: 
     #   username: The username of the User whose projects are being retrieved
     # Output: 
     #   The list of the user's projects
-    def get_projects(username: str):
+    def get_project_list(username: str):
         with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 user_group = account_data[user]
@@ -149,14 +149,14 @@ class Utilities:
                             encoded_project = base64.b64encode(serialized_project).decode('utf-8')
                             project_dataset[-1] = encoded_project
 
-    # Name: get_tasks
+    # Name: get_task_list
     # Description: Retrieve the list of tasks for a particular project
     # Input: 
     #   username: The username of the user whose tasks are being retrieved
     #   project_name: The name of the project whose tasks are being retrieved
     # Output:
     #   List of tasks for a particular project
-    def get_tasks(username: str, project_name: str):
+    def get_task_list(username: str, project_name: str):
         with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 user_group = account_data[user]

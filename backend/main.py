@@ -19,9 +19,9 @@ app = FastAPI()
 # Sign up route
 @app.post("/signup")
 def signup(username: str, password: str):
-    if Utilities.find_username(username):
+    if Utilities.username_exists(username):
         raise HTTPException(status_code=400, detail="Username already exists")
-    if Utilities.find_password(password):
+    if Utilities.password_exists(password):
         raise HTTPException(status_code=400, detail="Password already exists")
     # Hash the password and store the user
     # hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
@@ -35,7 +35,7 @@ def signup(username: str, password: str):
 @app.post("/login")
 async def login(username: str, password: str):
     # If the username exists AND the password is valid login
-    if Utilities.find_username_and_password(username, password):
+    if Utilities.account_exists(username, password):
         return {"message": "Login successful"}
     raise HTTPException(status_code=400, detail="Invalid username or password")
 
@@ -52,7 +52,7 @@ async def add_project(username: str, project_name: str):
 # Get from "{username} API endpoint"
 @app.get("/{username}", response_model = List[dict])
 async def get_projects(username: str):
-    project_list = Utilities.get_projects(username)
+    project_list = Utilities.get_project_list(username)
     project_dicts = [project.to_dict() for project in project_list]
     return project_dicts
 
@@ -67,6 +67,6 @@ async def add_task(username: str, project_name: str, task_name: str):
 # Get from "{username}/{project_name} API endpoint"
 @app.get("/{username}/{project_name}", response_model=List[dict])
 async def get_tasks(username: str, project_name: str):
-    task_list = Utilities.get_tasks(username, project_name)
+    task_list = Utilities.get_task_list(username, project_name)
     task_dicts = [task.to_dict() for task in task_list]
     return task_dicts

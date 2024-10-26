@@ -110,7 +110,7 @@ def display_projects():
 # Function to display tasks and add new tasks
 def display_tasks():
     st.subheader(f"{st.session_state.project_name} Homepage")
-    col1, col2 = st.columns([3, 1])
+    col1, col2, col3 = st.columns([3, 1, 1])
 
     # COL1 OF TASKS PAGE
     if "tasks" not in st.session_state:
@@ -144,6 +144,12 @@ def display_tasks():
     with col2:
         if st.button("Back"):
             del st.session_state.project_name
+            st.rerun()
+    
+    # COL3: Logout button
+    with col3:
+        if st.button("Logout"):
+            st.session_state.clear()
             st.rerun()
 
 # Home page to choose between login or signup
