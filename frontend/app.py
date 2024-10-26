@@ -62,9 +62,54 @@ def display_signup():
         st.session_state.page = "home"
         st.rerun()
 
+# Function to display projects and add new projects
+def display_projects():
+    st.subheader(f"Welcome, {st.session_state.username}")
+    col1, col2 = st.columns([3, 1])
+
+    # COL1 OF HOME PAGE
+    with col1:
+        project_name = st.text_input("Enter a new project name")
+        
+        if st.button("Create Project"):
+            if project_name:
+                # THIS NEEDS TO BE IMPLEMENTED
+                response = requests.post(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username, "project_name": project_name})
+                if response.status_code == 200:
+                    st.rerun()
+                    st.success(f"Project {project_name} added!")
+                else:
+                    st.error("Project with this name already exists or invalid input.")
+            else:
+                st.error("Please enter a project name.")
+        
+        # Fetch current projects
+        st.subheader("Your Projects")
+
+        response = requests.get(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username})
+        if response.status_code == 200:
+            project_list = response.json()
+            i = 1
+            # for project in project_list:
+            #     st.write(f"{i}. {project['name']}")
+            #     i = i + 1
+            for project in project_list:
+                if st.button(f"{i}. {project['name']}"):
+                    # st.write(f"{project['name']} was clicked")
+                    st.session_state.project_name = project['name']
+                    st.rerun()
+                i = i + 1
+
+    # COL2: Logout Button
+    with col2:
+        if st.button("Logout"):
+            st.session_state.clear()
+            st.rerun()
+
+
 # Function to display tasks and add new tasks
 def display_tasks():
-    st.subheader(f"Welcome, {st.session_state.username}")
+    st.subheader(f"{st.session_state.project_name} Homepage")
     col1, col2 = st.columns([3, 1])
 
     # COL1 OF TASKS PAGE
@@ -75,7 +120,7 @@ def display_tasks():
             
         if st.button("Add Task"):
             if task_name:
-                response = requests.post(f"{API_URL}/tasks/{st.session_state.username}", params={"username": st.session_state.username, "task_name": task_name})
+                response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"username": st.session_state.username, "project_name": st.session_state.project_name, "task_name": task_name})
                 if response.status_code == 200:
                     st.rerun()
                     st.success(f'Task "{task_name}" added!')
@@ -87,7 +132,7 @@ def display_tasks():
         # Fetch tasks
         st.subheader("Your Tasks")
             
-        response = requests.get(f"{API_URL}/tasks/{st.session_state.username}", params={"username": st.session_state.username})
+        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"username": st.session_state.username, "project_name": st.session_state.project_name})
         if response.status_code == 200:
             task_list = response.json()
             i = 1
@@ -95,10 +140,10 @@ def display_tasks():
                 st.write(f"{i}. {task['name']}")
                 i = i + 1
 
-    # COL2: Logout button
+    # COL2: Back button
     with col2:
-        if st.button("Logout"):
-            st.session_state.clear()
+        if st.button("Back"):
+            del st.session_state.project_name
             st.rerun()
 
 # Home page to choose between login or signup
@@ -129,8 +174,10 @@ def main():
         st.session_state.page = "home"
 
     # Navigation logic based on page state
-    if st.session_state.logged_in:
+    if "project_name" in st.session_state:
         display_tasks()
+    elif st.session_state.logged_in:
+        display_projects()
     elif st.session_state.page == "home":
         display_home()
     elif st.session_state.page == "login":

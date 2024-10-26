@@ -38,4 +38,4 @@ class Task:
         self.assignee = new_assignee
 
     def to_dict(self):
-        return {"name": self.name, "description": self.description, "priority": self.priority, "deadline": self.deadline, "status": self.status, "assignee": self.assignee}
+        return {"name": self.name, "description": self.description, "priority": self.priority, "deadline": self.deadline, "status": self.status, "assignee": self.assignee,}
