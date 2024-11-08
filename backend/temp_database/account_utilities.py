@@ -102,6 +102,29 @@ class Account_Utilities:
                 project_dataset[-1] = project_name.encode('utf-8')
             except:
                 raise ValueError(f"There was an error adding Project {project_name} to {username}")
+            
+    # Name: remove_project
+    # Description: Removes a project name from the user's project list
+    # Input: 
+    #   project_name: The name of the project being removed
+    #   username: The name of the user who is having the project removed 
+    def remove_project(project_name: str, username: str):
+
+        with h5py.File('/app/temp_database/account_data.hdf5', 'a') as account_data:
+            try:
+                user_group = account_data[username]
+                project_dataset = user_group['Projects']
+                project_list = [p.decode('utf-8') for p in project_dataset[()]]
+
+                if project_name in project_list:
+                    project_list.remove(project_name)
+
+                    del user_group['Projects']
+                    user_group.create_dataset('Projects', shape=(0,), maxshape=(None,), dtype=h5py.string_dtype(encoding='utf-8'))
+                    for project in project_list:
+                        Account_Utilities.add_project(project, username)
+            except:
+                raise ValueError(f"User {username} or project dataset does not exist")
 
     # Name: get_project_list
     # Description: Retrieve the list of project names for a particular user

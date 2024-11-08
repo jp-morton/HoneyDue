@@ -1,9 +1,9 @@
 from enum import Enum
 
 class Role(Enum):
-    GUEST = 1
-    MEMBER = 2
-    OWNER = 3
+    OWNER = 'Owner'
+    MEMBER = 'Member'
+    GUEST = 'Guest'
 
 class User:
     

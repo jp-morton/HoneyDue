@@ -36,7 +36,7 @@ class Project_Utilities:
     # Input: 
     #   username: The username being added to the project member list
     #   project_name: The name of the project that the user is being added to 
-    def add_collaborator(username: str, project_name: str):
+    def add_collaborator(username: str, role: str, project_name: str):
         with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
@@ -45,7 +45,8 @@ class Project_Utilities:
                 project_obj = pickle.loads(serialized_project)
             except:
                 raise ValueError(f"Error loading project '{project_name}'")
-            project_obj.members.append(username)
+            project_obj.add_collaborator(username, role)
+            # project_obj.members.append(username)
             serialized_project = pickle.dumps(project_obj)
             del project_data[project_name]
             project_data.create_dataset(project_name, data=np.void(serialized_project))
@@ -62,7 +63,7 @@ class Project_Utilities:
         with h5py.File('/app/temp_database/project_data.hdf5', 'r') as project_data:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
-            return project_obj.members
+            return project_obj.collaborators
 
     # Name: add_task
     # Description: Adds a task to a particular project
@@ -104,3 +105,57 @@ class Project_Utilities:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
             return project_obj.owner
+
+    # Name: get_user_role
+    # Description: Returns a user's role in a particular project
+    # Input
+    #   project_name: the name of the project being searched
+    #   username: The username of the user whose role is being retrieved
+    # Output: The role (OWNER, MEMBER, GUEST) of the user for the specified project
+    def get_user_role(project_name: str, username: str):
+        if Account_Utilities.user_has_project(username, project_name):
+            with h5py.File('/app/temp_database/project_data.hdf5', 'r') as project_data:
+                serialized_project = project_data[project_name][()]
+                project_obj = pickle.loads(serialized_project)
+                return project_obj.collaborators[username]
+        else:
+            raise ValueError(f"User '{username}' is not in project {project_name}.")
+
+    # Name: update_user_role
+    # Description: Changes a user's role for a particular project
+    # Input
+    #   project_name: The name of the project that the role change is occurring in 
+    #   username: The username of the user whose role is changing
+    #   new_role: The new role (OWNER, MEMBER, GUEST) of the user
+    def update_user_role(project_name: str, username: str, new_role: str):
+        if Account_Utilities.user_has_project(username, project_name):
+            with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
+                serialized_project = project_data[project_name][()]
+                project_obj = pickle.loads(serialized_project)
+                project_obj.update_role(username, new_role)
+                serialized_project = pickle.dumps(project_obj)
+                del project_data[project_name]
+                project_data.create_dataset(project_name, data=np.void(serialized_project))
+        else:
+            raise ValueError(f"User '{username}' is not in project {project_name}.")
+
+    # Name: remove_collaborator
+    # Description: Removes a user as a collaborator for a project
+    # Input:
+    #   project_name: The name of the project that the user is being removed from 
+    #   collaborator: The username of the user being removed
+    def remove_collaborator(project_name: str, collaborator: str):
+        with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
+            if project_name not in project_data:
+                raise ValueError(f"Project '{project_name}' not found.")
+            try:
+                serialized_project = project_data[project_name][()]
+                project_obj = pickle.loads(serialized_project)
+            except:
+                raise ValueError(f"Error loading project '{project_name}'")
+            project_obj.remove_collaborator(collaborator)
+            serialized_project = pickle.dumps(project_obj)
+            del project_data[project_name]
+            project_data.create_dataset(project_name, data=np.void(serialized_project))
+
+            Account_Utilities.remove_project(project_name, collaborator)

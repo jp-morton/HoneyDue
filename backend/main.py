@@ -70,10 +70,10 @@ async def get_tasks(project_name: str):
 # Post to "{username}/{project_name}/collaborators API endpoint"
 @app.post("/{username}/{project_name}/collaborators", response_model=dict)
 # Add a collaborator
-async def add_collaborator(collaborator_name: str, project_name: str):
+async def add_collaborator(collaborator_name: str, role: str, project_name: str):
     if Account_Utilities.username_exists(collaborator_name):
         if not Account_Utilities.user_has_project(collaborator_name, project_name):
-            Project_Utilities.add_collaborator(collaborator_name, project_name)
+            Project_Utilities.add_collaborator(collaborator_name, role, project_name)
             return {"message": "User added successfully."}
         else:
             raise HTTPException(status_code=400, detail=f"{collaborator_name} is already a collaborator")
@@ -81,14 +81,26 @@ async def add_collaborator(collaborator_name: str, project_name: str):
         raise HTTPException(status_code=400, detail=f"{collaborator_name} does not exist")
 
 # Post to "{username}/{project_name}/collaborators API endpoint"
-@app.get("/{username}/{project_name}/collaborators", response_model = List[str])
-# Get collaborator list
+@app.get("/{username}/{project_name}/collaborators", response_model = dict)
+# Get collaborator dict
 async def get_collaborators(project_name: str):
-    collaborator_list = Project_Utilities.get_collaborators(project_name)
-    return collaborator_list
+    collaborator_dict = Project_Utilities.get_collaborators(project_name)
+    return collaborator_dict
 
-# Get from "{username}/{project_name} API endpoint"
-@app.get("/{username}/{project_name}/owner")
-async def get_project_owner(project_name: str):
-    project_owner = Project_Utilities.get_project_owner(project_name)
-    return project_owner
+# Post to "{username}/{project_name}/role API endpoint"
+@app.post("/{username}/{project_name}/role", response_model=dict)
+async def update_user_role(project_name: str, collaborator: str, new_role: str):
+    Project_Utilities.update_user_role(project_name, collaborator, new_role)
+    return {"message": "User role updated successfully."}
+
+# Get from "{username}/{project_name}/role API endpoint"
+@app.get("/{username}/{project_name}/role", response_model=str)
+async def get_user_role(project_name: str, username: str):
+    role = Project_Utilities.get_user_role(project_name, username)
+    return role
+
+# Post to "{username}/{project_name}/remove_collaborator API endpoint"
+@app.post("/{username}/{project_name}/remove_collaborator")
+async def remove_collaborator(project_name: str, collaborator: str):
+    Project_Utilities.remove_collaborator(project_name, collaborator)
+    return {"message": "User role updated successfully."}
