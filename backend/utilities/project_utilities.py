@@ -4,7 +4,7 @@ import pickle
 
 from libraries.task import Task
 from libraries.project import Project
-from temp_database.account_utilities import Account_Utilities
+from utilities.account_utilities import Account_Utilities
 
 class Project_Utilities:
 
@@ -13,7 +13,7 @@ class Project_Utilities:
     # Input:
     #   project: The project object being added to the data
     def add_project(project: Project):
-        with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             serialized_project = pickle.dumps(project)
             project_data.create_dataset(project.name, data=np.void(serialized_project))
 
@@ -25,7 +25,7 @@ class Project_Utilities:
     #   True if the project name already exists
     #   False if the project name does not already exist
     def project_exists(project_name: str):
-        with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             for project in project_data:
                 if project == project_name:
                     return True
@@ -37,7 +37,7 @@ class Project_Utilities:
     #   username: The username being added to the project member list
     #   project_name: The name of the project that the user is being added to 
     def add_collaborator(username: str, role: str, project_name: str):
-        with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
             try:
@@ -60,7 +60,7 @@ class Project_Utilities:
     # Output: 
     #   The list of collaborators
     def get_collaborators(project_name: str):
-        with h5py.File('/app/temp_database/project_data.hdf5', 'r') as project_data:
+        with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
             return project_obj.collaborators
@@ -71,7 +71,7 @@ class Project_Utilities:
     #   task: The Task object being added to the project 
     #   project_name: The name of the project that the task is being added to 
     def add_task(task: Task, project_name: str):
-        with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
 
@@ -91,7 +91,7 @@ class Project_Utilities:
     # Input
     #   project_name: The name of the project whose task list is being retrieved
     def get_task_list(project_name: str):
-        with h5py.File('/app/temp_database/project_data.hdf5', 'r') as project_data:
+        with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
             return project_obj.tasks
@@ -101,7 +101,7 @@ class Project_Utilities:
     # Input
     #   project_name: The name of the project whose owner is being retrieved 
     def get_project_owner(project_name: str):
-        with h5py.File('/app/temp_database/project_data.hdf5', 'r') as project_data:
+        with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
             return project_obj.owner
@@ -114,7 +114,7 @@ class Project_Utilities:
     # Output: The role (OWNER, MEMBER, GUEST) of the user for the specified project
     def get_user_role(project_name: str, username: str):
         if Account_Utilities.user_has_project(username, project_name):
-            with h5py.File('/app/temp_database/project_data.hdf5', 'r') as project_data:
+            with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
                 serialized_project = project_data[project_name][()]
                 project_obj = pickle.loads(serialized_project)
                 return project_obj.collaborators[username]
@@ -129,7 +129,7 @@ class Project_Utilities:
     #   new_role: The new role (OWNER, MEMBER, GUEST) of the user
     def update_user_role(project_name: str, username: str, new_role: str):
         if Account_Utilities.user_has_project(username, project_name):
-            with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
+            with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
                 serialized_project = project_data[project_name][()]
                 project_obj = pickle.loads(serialized_project)
                 project_obj.update_role(username, new_role)
@@ -145,7 +145,7 @@ class Project_Utilities:
     #   project_name: The name of the project that the user is being removed from 
     #   collaborator: The username of the user being removed
     def remove_collaborator(project_name: str, collaborator: str):
-        with h5py.File('/app/temp_database/project_data.hdf5', 'a') as project_data:
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
             try:

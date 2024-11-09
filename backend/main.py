@@ -9,8 +9,8 @@ import numpy as np
 from libraries.user import User
 from libraries.task import Task
 from libraries.project import Project
-from temp_database.account_utilities import Account_Utilities
-from temp_database.project_utilities import Project_Utilities
+from utilities.account_utilities import Account_Utilities
+from utilities.project_utilities import Project_Utilities
 
 app = FastAPI()
 

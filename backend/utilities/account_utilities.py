@@ -14,7 +14,7 @@ class Account_Utilities:
     #   True if the username is found
     #   False if the username is not found        
     def username_exists(username: str):
-        with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
+        with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             if username in account_data:
                 return True
             return False
@@ -27,7 +27,7 @@ class Account_Utilities:
     #   True if the password is found
     #   False if the password is not found
     def password_exists(password: str):
-        with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
+        with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 user_group = account_data[user]
                 if user_group.attrs['Password'] == password:
@@ -43,7 +43,7 @@ class Account_Utilities:
     #   True if the account is found
     #   False if the account is not found
     def account_exists(username: str, password: str):
-        with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
+        with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             try:
                 user_group = account_data[username]
                 if user_group.attrs['Password'] == password:
@@ -58,7 +58,7 @@ class Account_Utilities:
     #   username: The username of the user being added
     #   password: The password of the user being added 
     def add_user(username: str, password: str):
-        with h5py.File('/app/temp_database/account_data.hdf5', 'a') as account_data:
+        with h5py.File('/app/database/account_data.hdf5', 'a') as account_data:
             if Account_Utilities.username_exists(username):  
                 raise ValueError("Username already exists.")
             elif Account_Utilities.password_exists(password):
@@ -94,7 +94,7 @@ class Account_Utilities:
     #   username: The username of the user adding the project
     def add_project(project_name: str, username: str):
 
-        with h5py.File('/app/temp_database/account_data.hdf5', 'a') as account_data:
+        with h5py.File('/app/database/account_data.hdf5', 'a') as account_data:
             try:
                 user_group = account_data[username]
                 project_dataset = user_group['Projects']
@@ -110,7 +110,7 @@ class Account_Utilities:
     #   username: The name of the user who is having the project removed 
     def remove_project(project_name: str, username: str):
 
-        with h5py.File('/app/temp_database/account_data.hdf5', 'a') as account_data:
+        with h5py.File('/app/database/account_data.hdf5', 'a') as account_data:
             try:
                 user_group = account_data[username]
                 project_dataset = user_group['Projects']
@@ -133,7 +133,7 @@ class Account_Utilities:
     # Output: 
     #   The list of the user's projects
     def get_project_list(username: str):
-        with h5py.File('/app/temp_database/account_data.hdf5', 'r') as account_data:
+        with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 if user == username:
                     user_group = account_data[user]
