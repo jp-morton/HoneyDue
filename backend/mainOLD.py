@@ -1,19 +1,16 @@
 from fastapi import FastAPI, HTTPException, Request
-from datetime import date
+
 from pydantic import BaseModel
 from typing import List
 import uvicorn
 import h5py
 import numpy as np
-from typing import Optional
+
 from libraries.user import User
 from libraries.task import Task
 from libraries.project import Project
 from utilities.account_utilities import Account_Utilities
 from utilities.project_utilities import Project_Utilities
-
-from libraries.task import Status
-
 
 app = FastAPI()
 
@@ -55,29 +52,12 @@ async def get_projects(username: str):
     project_list = Account_Utilities.get_project_list(username)
     return project_list
 
-
-class TaskRequest(BaseModel):
-    task_name: str
-    description: Optional[str] = ""
-    priority: int
-    deadline: date
-    category: Optional[str] = ""
-    status: Status.value
-    assignee: Optional[str] = None
-
 # Post to "{username}/{project_name} API endpoint"
 @app.post("/{username}/{project_name}", response_model=dict)
-async def add_task(username: str, project_name: str, task: TaskRequest):
-    new_task = Task(
-        name=task.task_name,
-        description=task.description,
-        priority=task.priority,
-        deadline=task.deadline,
-        category=task.category,
-        status=task.status,
-        assignee=task.assignee or username
-    )
-    Project_Utilities.add_task(new_task, project_name)
+# Add a task to the task list
+async def add_task(username: str, project_name: str, task_name: str):
+    task = Task(task_name, "", 1, "01/01/2024", 0, username)
+    Project_Utilities.add_task(task, project_name)
     return {"message": "Task added successfully."}
 
 # Get from "{username}/{project_name} API endpoint"

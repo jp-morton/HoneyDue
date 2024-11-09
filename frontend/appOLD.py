@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-from libraries.task import Status
 
 API_URL = "http://backend:8000"
 
@@ -119,35 +118,20 @@ def display_tasks():
     if "tasks" not in st.session_state:
         st.session_state.tasks = []
     with col1:
+        # Add tasks (FOR MEMBER AND OWNER ONLY)
         if role != 'Guest':
-            task_name = st.text_input("Task Name")
-            description = st.text_area("Description")
-            priority = st.number_input("Priority", min_value=1, max_value=5, value=1)
-            deadline = st.date_input("Deadline")
-            category = st.text_input("Category")
-            status = st.selectbox("Status", options=[Status.TODO, Status.DOING, Status.DONE])
-            assignee = st.text_input("Assignee", value=st.session_state.username)
+            task_name = st.text_input("Enter a new task")
             
             if st.button("Add Task"):
-                task_data = {
-                    "task_name": task_name,
-                    "description": description,
-                    "priority": priority,
-                    "deadline": str(deadline),
-                    "category": category,
-                    "status": status.value,
-                    "assignee": assignee
-                }
-                response = requests.post(
-                    f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}",
-                    json=task_data
-                )
-                if response.status_code == 200:
-                    st.rerun()
-                    st.success(f'Task "{task_name}" added!')
+                if task_name:
+                    response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"username": st.session_state.username, "project_name": st.session_state.project_name, "task_name": task_name})
+                    if response.status_code == 200:
+                        st.rerun()
+                        st.success(f'Task "{task_name}" added!')
+                    else:
+                        st.error(f"Error: {response.text}")
                 else:
-                    st.error(f"Error: {response.text}")
-
+                    st.error("Please enter a task.")
 
         # Fetch tasks
         st.subheader("Project Tasks")
