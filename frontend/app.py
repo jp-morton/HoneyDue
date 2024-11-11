@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 
+
 API_URL = "http://backend:8000"
 
 # Helper function to handle user login
@@ -267,9 +268,40 @@ def display_team_settings():
                 else:
                     st.error("Please select a collaborator.")
 
+# The Theme of the project. 
+def display_background_image():
+    background_img = """
+        <style>
+        [data-testid="stAppViewContainer"]{
+        background-color: #e5e5f7;
+        opacity: 1;
+        background-image:  repeating-radial-gradient( circle at 0 0, transparent 0, #e5e5f7 40px ), repeating-linear-gradient( #d2d82455, #d2d824 );
+        }
+        <style>
+        """
+
+        # Add custom CSS for background color
+    st.markdown(background_img, unsafe_allow_html=True)
+
+
 # Home page to choose between login or signup
 def display_home():
-    st.title("Welcome to HoneyDue")
+
+    #Adjusting the 'Welcome to HoneyDue' to the center of the page. 
+    st.markdown(
+        """
+        <style>
+        .centered-title {
+            text-align: center;
+            font-size: 3em; /* Adjust font size as needed */
+            font-weight: bold;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown('<div class="centered-title">Welcome to HoneyDue 😊! </div>', unsafe_allow_html=True)
+
     st.subheader("Please choose an option")
     
     col1, col2 = st.columns(2)
@@ -286,8 +318,26 @@ def display_home():
 
 # Main application
 def main():
-    st.title("HoneyDue")
 
+    #Displaying the background image
+    display_background_image()
+
+    #Each screen will have the HoneyDue sign on the top
+    st.markdown(
+        """
+        <style>
+        .header-title {
+            font-size: 8em; /* Larger font size */
+            font-weight: bold;
+            text-align: center;
+            padding: 10px; /* Space around the title */             
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )   
+    st.markdown('<div class="header-title">HoneyDue</div>', unsafe_allow_html=True)
+    
     if "logged_in" not in st.session_state:
         st.session_state.logged_in = False
 
