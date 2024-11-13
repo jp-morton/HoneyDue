@@ -302,16 +302,15 @@ def display_home():
     )
     st.markdown('<div class="centered-title">Welcome to HoneyDue 😊! </div>', unsafe_allow_html=True)
 
-    st.subheader("Please choose an option")
+    #Centered the buttons to the screen
+    col1, col2, col3 = st.columns([.60,.50,1])
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
+    with col2:
         if st.button("Login"):
             st.session_state.page = "login"
             st.rerun()
 
-    with col2:
+    with col3:
         if st.button("Sign Up"):
             st.session_state.page = "signup"
             st.rerun()
