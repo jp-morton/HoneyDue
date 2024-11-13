@@ -140,3 +140,26 @@ class Account_Utilities:
                     project_dataset = user_group['Projects']
                     project_list = [project.decode('utf-8') for project in project_dataset]
                     return project_list
+
+
+
+
+
+
+    #################################################
+    # THE FOLLOWING FUNCTION IS TO RESET THE DATABASE
+    #################################################
+
+    def reset():
+        with h5py.File('/app/database/account_data.hdf5', 'w') as account_data:
+            i = 1
+            while i <= 4:
+                user_group = account_data.create_group(f'user{i}')
+                user_group.attrs['Password'] = f'password{i}'
+                user_group.create_dataset('Projects', shape=(0,), maxshape=(None,), dtype=h5py.string_dtype(encoding='utf-8'))
+                i = i + 1
+
+        Account_Utilities.add_project('Project1', 'user1')
+        Account_Utilities.add_project('Project2', 'user2')
+        Account_Utilities.add_project('Project3', 'user3')
+        Account_Utilities.add_project('Project4', 'user4')
