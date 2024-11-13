@@ -159,3 +159,62 @@ class Project_Utilities:
             project_data.create_dataset(project_name, data=np.void(serialized_project))
 
             Account_Utilities.remove_project(project_name, collaborator)
+
+
+
+
+
+    #################################################
+    # THE FOLLOWING FUNCTION IS TO RESET THE DATABASE
+    #################################################
+
+    def reset():
+        project_data = h5py.File('/app/database/project_data.hdf5', 'w')
+
+        # Create Projects
+        Project1 = Project('Project1', 'user1')
+        Project_Utilities.add_project(Project1)
+
+        Project2 = Project('Project2', 'user2')
+        Project_Utilities.add_project(Project2)
+
+        Project3 = Project('Project3', 'user3')
+        Project_Utilities.add_project(Project3)
+
+        Project4 = Project('Project4', 'user4')
+        Project_Utilities.add_project(Project4)
+
+        # Add collaborators to project 1
+        Project_Utilities.add_collaborator('user2', 'Member', 'Project1')
+        Project_Utilities.add_collaborator('user3', 'Member', 'Project1')
+        Project_Utilities.add_collaborator('user4', 'Guest', 'Project1')
+
+        # Add collaborators to project 2
+        Project_Utilities.add_collaborator('user1', 'Member', 'Project2')
+        Project_Utilities.add_collaborator('user3', 'Owner', 'Project2')
+        Project_Utilities.add_collaborator('user4', 'Member', 'Project2')
+
+        # Add collaborators to project 3
+        Project_Utilities.add_collaborator('user1', 'Guest', 'Project3')
+        Project_Utilities.add_collaborator('user2', 'Guest', 'Project3')
+        Project_Utilities.add_collaborator('user4', 'Member', 'Project3')
+
+        # Add collaborators to project 4
+        Project_Utilities.add_collaborator('user1', 'Owner', 'Project4')
+        Project_Utilities.add_collaborator('user2', 'Guest', 'Project4')
+        Project_Utilities.add_collaborator('user3', 'Member', 'Project4')
+
+        # Add tasks to the projects
+        task1 = Task(name="Task1", description="This is a test task called task1", priority=2, deadline="2024-12-25", category="Testing", status="Todo", assignee="User1")
+        task2 = Task(name="Task1", description="This is a test task called task1", priority=3, deadline="2024-12-21", category="Testing", status="Todo", assignee="User2")
+        task3 = Task(name="Task1", description="This is a test task called task1", priority=1, deadline="2025-01-04", category="Testing", status="Todo", assignee="User3")
+        task4 = Task(name="Task1", description="This is a test task called task1", priority=4, deadline="2025-01-11", category="Testing", status="Todo", assignee="User1")
+        task5 = Task(name="Task2", description="This is a test task called task2", priority=5, deadline="2024-12-15", category="Testing", status="Todo", assignee="User3")
+        task6 = Task(name="Task2", description="This is a test task called task2", priority=2, deadline="2025-12-31", category="Testing", status="Todo", assignee="User4")
+
+        Project_Utilities.add_task(task1, 'Project1')
+        Project_Utilities.add_task(task2, 'Project2')
+        Project_Utilities.add_task(task3, 'Project3')
+        Project_Utilities.add_task(task4, 'Project4')
+        Project_Utilities.add_task(task5, 'Project1')
+        Project_Utilities.add_task(task6, 'Project2')

@@ -14,8 +14,11 @@ from utilities.project_utilities import Project_Utilities
 
 app = FastAPI()
 
-
-
+# IF SET TO TRUE, THE FOLLOWING FLAG WILL RESET THE DATABASE 
+database_reset = True
+if database_reset:
+    Account_Utilities.reset()
+    Project_Utilities.reset()
 
 # Sign up route
 @app.post("/signup")
@@ -55,9 +58,18 @@ async def get_projects(username: str):
 # Post to "{username}/{project_name} API endpoint"
 @app.post("/{username}/{project_name}", response_model=dict)
 # Add a task to the task list
-async def add_task(username: str, project_name: str, task_name: str):
-    task = Task(task_name, "", 1, "01/01/2024", 0, username)
-    Project_Utilities.add_task(task, project_name)
+async def add_task(request: Request):
+    task_info = await request.json()
+    new_task = Task(
+        name=task_info.get("task_name"), 
+        description=task_info.get("description"), 
+        priority=task_info.get("priority"),
+        deadline=task_info.get("deadline"),
+        category=task_info.get("category"),
+        status=task_info.get("status"),
+        assignee=task_info.get("assignee")
+    )
+    Project_Utilities.add_task(new_task, task_info.get("project_name"))
     return {"message": "Task added successfully."}
 
 # Get from "{username}/{project_name} API endpoint"
