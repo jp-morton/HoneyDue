@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 
+
 API_URL = "http://backend:8000"
 
 # Helper function to handle user login
@@ -26,42 +27,66 @@ def add_task(username, task_name):
 
 # Function to display login form and handle login logic
 def display_login():
-    st.subheader("Login")
+    # Display button organization
+    col1, col2, col3 = st.columns([4, 4, 1])
+    with col1:
+        st.subheader("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    if st.button("Login"):
-        if login(username, password):
-            st.session_state.logged_in = True
-            st.session_state.username = username
+
+    col4, col5, col6 = st.columns([.25, .50, 1])
+    with col4:
+        if st.button("Login"):
+            if login(username, password):
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.rerun()
+                st.success("Logged in successfully!")
+            else:
+                st.error("Invalid username or password")
+
+    # Move "Back" button to top right
+    with col3:    
+        # Add "Back" button to return to home page
+        if st.button("Back"):
+            st.session_state.page = "home"
             st.rerun()
-            st.success("Logged in successfully!")
-        else:
-            st.error("Invalid username or password")
-    
-    # Add "Back" button to return to home page
-    if st.button("Back"):
-        st.session_state.page = "home"
-        st.rerun()
+
+    with col5:
+        # Add "Sign up" button to login screen
+        if st.button("Sign up"):
+            st.session_state.page = "signup"
+            st.rerun()
+
 
 # Function to display signup form and handle account creation
 def display_signup():
-    st.subheader("Sign Up")
+
+    col1, col2, col3 = st.columns([4, 4, 1])
+    with col1:
+        st.subheader("Sign Up")
     username = st.text_input("Create Username")
     password = st.text_input("Create Password", type="password")
+    verify_password = st.text_input("Verify Password", type="password")
     
-    if st.button("Sign Up"):
-        signup_attempt = signup(username, password)
-        if signup_attempt.ok:
-            st.success("Account created successfully! Please log in.")
-        else:
-            error_detail = signup_attempt.json().get("detail", "Error: ")
-            st.error(error_detail)
-    
-    # Add "Back" button to return to home page
-    if st.button("Back"):
-        st.session_state.page = "home"
-        st.rerun()
+    col4, col5, col6 = st.columns([.25, .50, 1])
+
+    with col4:
+        if st.button("Sign Up"):
+            signup_attempt = signup(username, password, verify_password)
+            if password == verify_password:
+                if signup_attempt.ok:
+                    st.success("Account created successfully! Please log in.")
+            else:
+                error_detail = signup_attempt.json().get("detail", "Error: ")
+                st.error(error_detail)
+
+    with col3:    
+        # Add "Back" button to return to home page
+        if st.button("Back"):
+            st.session_state.page = "home"
+            st.rerun()
 
 # Function to display projects and add new projects
 def display_projects():
@@ -120,33 +145,29 @@ def display_tasks():
     with col1:
         # Add tasks (FOR MEMBER AND OWNER ONLY)
         if role != 'Guest':
-            task_name = st.text_input("Task Name")
-            description = st.text_area("Description")
-            priority = st.number_input("Priority", min_value=1, max_value=5, value=1)
-            deadline = st.date_input("Deadline")
-            category = st.text_input("Category")
-            status = st.selectbox("Status", options=["TODO", "DOING", "DONE"])
-            assignee = st.text_input("Assignee", value=st.session_state.username)
-
+            task_name = st.text_input("Enter a new task")
             
             if st.button("Add Task"):
-                task_data = {
-                    "project_name": st.session_state.project_name,
-                    "task_name": task_name, 
-                    "description": description, 
-                    "priority": priority, 
-                    "deadline": deadline.isoformat(), 
-                    "category": category, 
-                    "status": status, 
-                    "assignee": assignee
-                }
-
-                response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", json=task_data)
-                if response.status_code == 200:
-                    st.rerun()
-                    st.success(f'Task "{task_name}" added!')
+                if task_name:
+                    response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"username": st.session_state.username, "project_name": st.session_state.project_name, "task_name": task_name})
+                    if response.status_code == 200:
+                        st.rerun()
+                        st.success(f'Task "{task_name}" added!')
+                    else:
+                        st.error(f"Error: {response.text}")
                 else:
-                    st.error(f"Error: {response.text}")
+                    st.error("Please enter a task.")
+
+        # Fetch tasks
+        st.subheader("Project Tasks")
+            
+        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"project_name": st.session_state.project_name})
+        if response.status_code == 200:
+            task_list = response.json()
+            i = 1
+            for task in task_list:
+                st.write(f"{i}. {task['name']}")
+                i = i + 1
 
     # COL2: Back and Logout buttons
     with col2:
@@ -163,17 +184,6 @@ def display_tasks():
         if st.button("Team Settings"):
             st.session_state["team_settings"] = True
             st.rerun()
-    
-    # Fetch tasks
-    st.subheader("Project Tasks")
-           
-    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"project_name": st.session_state.project_name})
-    if response.status_code == 200:
-        task_list = response.json()
-        i = 1
-        for task in task_list:
-            st.write(f"{i}. {task['name']}\t{task['description']}\t{task['priority']}\t{task['deadline']}\t{task['category']}\t{task['status']}\t{task['assignee']}")
-            i = i + 1
     
 # Function to display team settings
 def display_team_settings():
@@ -282,27 +292,75 @@ def display_team_settings():
                 else:
                     st.error("Please select a collaborator.")
 
+# The Theme of the project. 
+def display_background_image():
+    background_img = """
+        <style>
+        [data-testid="stAppViewContainer"]{
+        background-color: #e5e5f7;
+        opacity: 1;
+        background-image:  repeating-radial-gradient( circle at 0 0, transparent 0, #e5e5f7 40px ), repeating-linear-gradient( #d2d82455, #d2d824 );
+        }
+        <style>
+        """
+
+        # Add custom CSS for background color
+    st.markdown(background_img, unsafe_allow_html=True)
+
+
 # Home page to choose between login or signup
 def display_home():
-    st.title("Welcome to HoneyDue")
-    st.subheader("Please choose an option")
+
+    #Adjusting the 'Welcome to HoneyDue' to the center of the page. 
+    st.markdown(
+        """
+        <style>
+        .centered-title {
+            text-align: center;
+            font-size: 3em; /* Adjust font size as needed */
+            font-weight: bold;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown('<div class="centered-title">Welcome to HoneyDue 😊! </div>', unsafe_allow_html=True)
+
+    #Centered the buttons to the screen
+    col1, col2, col3 = st.columns([.60,.50,1])
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
+    with col2:
         if st.button("Login"):
             st.session_state.page = "login"
             st.rerun()
 
-    with col2:
+    with col3:
         if st.button("Sign Up"):
             st.session_state.page = "signup"
             st.rerun()
 
 # Main application
 def main():
-    st.title("HoneyDue")
 
+    #Displaying the background image
+    display_background_image()
+
+    #Each screen will have the HoneyDue sign on the top
+    st.markdown(
+        """
+        <style>
+        .header-title {
+            font-size: 8em; /* Larger font size */
+            font-weight: bold;
+            text-align: center;
+            padding: 10px; /* Space around the title */             
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )   
+    st.markdown('<div class="header-title">HoneyDue</div>', unsafe_allow_html=True)
+    
     if "logged_in" not in st.session_state:
         st.session_state.logged_in = False
 
