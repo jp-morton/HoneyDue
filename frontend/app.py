@@ -27,42 +27,66 @@ def add_task(username, task_name):
 
 # Function to display login form and handle login logic
 def display_login():
-    st.subheader("Login")
+    # Display button organization
+    col1, col2, col3 = st.columns([4, 4, 1])
+    with col1:
+        st.subheader("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    if st.button("Login"):
-        if login(username, password):
-            st.session_state.logged_in = True
-            st.session_state.username = username
+
+    col4, col5, col6 = st.columns([.25, .50, 1])
+    with col4:
+        if st.button("Login"):
+            if login(username, password):
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.rerun()
+                st.success("Logged in successfully!")
+            else:
+                st.error("Invalid username or password")
+
+    # Move "Back" button to top right
+    with col3:    
+        # Add "Back" button to return to home page
+        if st.button("Back"):
+            st.session_state.page = "home"
             st.rerun()
-            st.success("Logged in successfully!")
-        else:
-            st.error("Invalid username or password")
-    
-    # Add "Back" button to return to home page
-    if st.button("Back"):
-        st.session_state.page = "home"
-        st.rerun()
+
+    with col5:
+        # Add "Sign up" button to login screen
+        if st.button("Sign up"):
+            st.session_state.page = "signup"
+            st.rerun()
+
 
 # Function to display signup form and handle account creation
 def display_signup():
-    st.subheader("Sign Up")
+
+    col1, col2, col3 = st.columns([4, 4, 1])
+    with col1:
+        st.subheader("Sign Up")
     username = st.text_input("Create Username")
     password = st.text_input("Create Password", type="password")
+    verify_password = st.text_input("Verify Password", type="password")
     
-    if st.button("Sign Up"):
-        signup_attempt = signup(username, password)
-        if signup_attempt.ok:
-            st.success("Account created successfully! Please log in.")
-        else:
-            error_detail = signup_attempt.json().get("detail", "Error: ")
-            st.error(error_detail)
-    
-    # Add "Back" button to return to home page
-    if st.button("Back"):
-        st.session_state.page = "home"
-        st.rerun()
+    col4, col5, col6 = st.columns([.25, .50, 1])
+
+    with col4:
+        if st.button("Sign Up"):
+            signup_attempt = signup(username, password, verify_password)
+            if password == verify_password:
+                if signup_attempt.ok:
+                    st.success("Account created successfully! Please log in.")
+            else:
+                error_detail = signup_attempt.json().get("detail", "Error: ")
+                st.error(error_detail)
+
+    with col3:    
+        # Add "Back" button to return to home page
+        if st.button("Back"):
+            st.session_state.page = "home"
+            st.rerun()
 
 # Function to display projects and add new projects
 def display_projects():
