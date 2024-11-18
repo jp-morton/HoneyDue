@@ -28,14 +28,14 @@ def add_task(username, task_name):
 # Function to display login form and handle login logic
 def display_login():
     # Display button organization
-    col1, col2, col3 = st.columns([4, 4, 1])
+    col1, col2, col3 = st.columns([6, 1, 1])
     with col1:
         st.subheader("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
 
-    col4, col5, col6 = st.columns([.25, .50, 1])
+    col4, col5 = st.columns([4, 3])
     with col4:
         if st.button("Login"):
             if login(username, password):
@@ -49,11 +49,11 @@ def display_login():
     # Move "Back" button to top right
     with col3:    
         # Add "Back" button to return to home page
-        if st.button("Back"):
+        if st.button("Home"):
             st.session_state.page = "home"
             st.rerun()
 
-    with col5:
+    with col2:
         # Add "Sign up" button to login screen
         if st.button("Sign up"):
             st.session_state.page = "signup"
@@ -63,14 +63,14 @@ def display_login():
 # Function to display signup form and handle account creation
 def display_signup():
 
-    col1, col2, col3 = st.columns([4, 4, 1])
+    col1, col2, col3 = st.columns([6, 1, 1])
     with col1:
         st.subheader("Sign Up")
     username = st.text_input("Create Username")
     password = st.text_input("Create Password", type="password")
     verify_password = st.text_input("Verify Password", type="password")
     
-    col4, col5, col6 = st.columns([.25, .50, 1])
+    col4, col5 = st.columns([4, 3])
 
     with col4:
         if st.button("Sign Up"):
@@ -82,9 +82,15 @@ def display_signup():
                 error_detail = signup_attempt.json().get("detail", "Error: ")
                 st.error(error_detail)
 
+    with col2:
+        # Add "Login" button to return to login page
+        if st.button("Login"):
+            st.session_state.page = "login"
+            st.rerun()
+
     with col3:    
         # Add "Back" button to return to home page
-        if st.button("Back"):
+        if st.button("Home"):
             st.session_state.page = "home"
             st.rerun()
 
