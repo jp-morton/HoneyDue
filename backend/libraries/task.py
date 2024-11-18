@@ -1,9 +1,9 @@
 from enum import Enum
 
 class Status(Enum):
-    TODO = 1
-    DOING = 2
-    DONE = 3
+    TODO = "TODO"
+    DOING = "DOING"
+    DONE = "DONE"
 
 class Task:
     
