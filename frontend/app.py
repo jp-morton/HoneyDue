@@ -32,6 +32,14 @@ def display_login():
     if st.sidebar.button("Home"):
         st.session_state.page = "home"
         st.rerun()
+
+    if st.sidebar.button("Sign Up"):
+        st.session_state.page = "signup"
+        st.rerun()
+    
+    if st.sidebar.button("Back"):
+        st.session_state.page = "home"
+        st.rerun()
     
     with st.form("Login"):
     
@@ -53,6 +61,10 @@ def display_signup():
 
     if st.sidebar.button("Home"):
         st.session_state.page = "home"
+        st.rerun()
+
+    if st.sidebar.button("Login"):
+        st.session_state.page = "login"
         st.rerun()
 
     with st.form("Sign up", clear_on_submit = True):
