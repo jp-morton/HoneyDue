@@ -76,14 +76,16 @@ def display_signup():
 # Function to display projects and add new projects
 def display_projects():
 
-    st.subheader(f"Welcome, {st.session_state.username}")
+    left, middle, right = st.columns(3, vertical_alignment="center")
+    middle.subheader(f"Welcome, {st.session_state.username}")
     col1, col2 = st.columns([3, 1])
 
     # COL1 OF HOME PAGE
-    with col1:
+    with st.sidebar:
+        
         project_name = st.text_input("Enter a new project name")
         
-        if st.button("Create Project"):
+        if st.sidebar.button("Create Project"):
             if project_name:
                 # THIS NEEDS TO BE IMPLEMENTED
                 response = requests.post(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username, "project_name": project_name})
@@ -95,18 +97,18 @@ def display_projects():
             else:
                 st.error("Please enter a project name.")
         
-        # Fetch current projects
-        st.subheader("Your Projects")
+    # Fetch current projects
+    st.subheader("Your Projects")
 
-        response = requests.get(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username})
-        if response.status_code == 200:
-            project_list = response.json()
-            i = 1
-            for project in project_list:
-                if st.button(f"{i}. {project}"):
-                    st.session_state.project_name = project
-                    st.rerun()
-                i = i + 1
+    response = requests.get(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username})
+    if response.status_code == 200:
+        project_list = response.json()
+        i = 1
+        for project in project_list:
+            if st.button(f"{i}. {project}"):
+                st.session_state.project_name = project
+                st.rerun()
+            i = i + 1
 
     # COL2: Logout Button
     with col2:
@@ -117,7 +119,8 @@ def display_projects():
 
 # Function to display tasks and add new tasks
 def display_tasks():
-    st.subheader(f"{st.session_state.project_name} Homepage")
+    left, middle, right = st.columns(3, vertical_alignment="center")
+    middle.subheader(f"{st.session_state.project_name} Homepage")
     # col1, col2, col3, col4, col5 = st.columns([3, 2, 5, 3, 4])
     col1, col2, col3 = st.columns([3, 2, 5])
 
@@ -178,15 +181,15 @@ def display_team_settings():
     with col1:
         st.title(st.session_state.project_name + " Team Settings")
 
-        # Add Log out button
-        if st.sidebar.button("Logout"):
-            st.session_state.clear()
-            st.rerun()
+    # Add Log out button
+    if st.sidebar.button("Logout"):
+        st.session_state.clear()
+        st.rerun()
 
-        # Return button
-        if st.sidebar.button("Back"):
-            del st.session_state["team_settings"]
-            st.rerun()
+    # Return button
+    if st.sidebar.button("Back"):
+        del st.session_state["team_settings"]
+        st.rerun()
 
     # Team Member List
     st.subheader("Team Members")
