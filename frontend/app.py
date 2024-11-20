@@ -24,11 +24,14 @@ def fetch_tasks(username):
 # Helper function to add a new task
 def add_task(username, task_name):
     requests.post(f"{API_URL}/tasks/{username}", params={"username": username, "task_name": task_name})
-
+        
 
 # Function to display login form and handle login logic
 def display_login():
 
+    if st.sidebar.button("Home"):
+        st.session_state.page = "home"
+        st.rerun()
     
     with st.form("Login"):
     
@@ -47,6 +50,10 @@ def display_login():
 
 # Function to display signup form and handle account creation
 def display_signup():
+
+    if st.sidebar.button("Home"):
+        st.session_state.page = "home"
+        st.rerun()
 
     with st.form("Sign up", clear_on_submit = True):
         
@@ -68,6 +75,7 @@ def display_signup():
 
 # Function to display projects and add new projects
 def display_projects():
+
     st.subheader(f"Welcome, {st.session_state.username}")
     col1, col2 = st.columns([3, 1])
 
@@ -102,7 +110,7 @@ def display_projects():
 
     # COL2: Logout Button
     with col2:
-        if st.button("Logout"):
+        if st.sidebar.button("Logout"):
             st.session_state.clear()
             st.rerun()
 
@@ -149,17 +157,17 @@ def display_tasks():
 
     # COL2: Back and Logout buttons
     with col2:
-        if st.button("Logout"):
+        if st.sidebar.button("Logout"):
             st.session_state.clear()
             st.rerun()
 
-        if st.button("Back"):
+        if st.sidebar.button("Back"):
             del st.session_state.project_name
             st.rerun()
     
     # COL3: Team Settings Button
     with col3:
-        if st.button("Team Settings"):
+        if st.sidebar.button("Team Settings"):
             st.session_state["team_settings"] = True
             st.rerun()
     
@@ -169,9 +177,14 @@ def display_team_settings():
     col1, col2 = st.columns([4, 2])
     with col1:
         st.title(st.session_state.project_name + " Team Settings")
-    with col2:
+
+        # Add Log out button
+        if st.sidebar.button("Logout"):
+            st.session_state.clear()
+            st.rerun()
+
         # Return button
-        if st.button("Return"):
+        if st.sidebar.button("Back"):
             del st.session_state["team_settings"]
             st.rerun()
 
