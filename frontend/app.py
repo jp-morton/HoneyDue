@@ -41,7 +41,7 @@ def display_login():
         st.session_state.page = "home"
         st.rerun()
     
-    with st.form("Login", clear_on_submit=True, border=False):
+    with st.form("Login", border=False):
 
         st.subheader("Login")
         username = st.text_input(label="username", placeholder="Username", label_visibility="collapsed")
@@ -130,9 +130,9 @@ def display_projects():
 
 # Function to display tasks and add new tasks
 def display_tasks():
+
     left, middle, right = st.columns([5, 7, 5], vertical_alignment="center")
     middle.subheader(f"{st.session_state.project_name} Homepage")
-    # col1, col2, col3, col4, col5 = st.columns([3, 2, 5, 3, 4])
     col1, col2, col3 = st.columns([5, 5, 5])
 
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
@@ -167,29 +167,61 @@ def display_tasks():
             task_list = response.json()
             i = 1
             for task in task_list:
-                st.write(f"{i}. {task['name']}")
+                task['status'] = "Not Started"
+                st.write(f"{i}. {task['name']} -- {task['status']}")
                 i = i + 1
 
-    with col2:
-        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", params={"project_name": st.session_state.project_name})
+
+
+    with col3:
+        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"project_name": st.session_state.project_name})
         if response.status_code == 200:
             task_dict = response.json()
-            task_listed = list(task_dict)
-            task_listed.remove(st.session_state.task)
-            task = st.selectbox(f"Task to update", ["Select a task"] + task_list, label_visibility="collapsed")
-            
-            with col3:
-                with st.form("Status", clear_on_submit=True, border=False):
-                    if st.form_submit_button("Completed"):
-                        if task != 'Select a task':
-                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_task", params={"project_name": st.session_state.project_name, "collaborator": collaborator})
+            task_names = [task['name'] for task in task_dict]
+            task = st.selectbox(f"Task to update", ["Select a task"] + task_names, label_visibility="collapsed")
+
+            if task != "Select a task":
+                with st.form("Update Status", clear_on_submit=True, border=False):
+                    status = st.selectbox("Select Status", ['','In Progress', 'Completed'], label_visibility="collapsed")
+                    if st.form_submit_button("Update Status"):
+                        if status == "Completed":
+                            # Remove task if completed
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_task", params={
+                                "username": st.session_state.username,
+                                "project_name": st.session_state.project_name,
+                                "task_name": task,
+                                "status": status
+                            })
                             if response.status_code == 200:
-                                st.rerun()
-                                st.success(f"Task has been removed.")
+                                task_dict = response.json()
+                                task_list = list(task_dict.keys(task["task_name"], task["status"]))
+                                task_list.remove(task["task_name"])
+                                st.rerun()  # Rerun to reflect task removal
+                                st.success(f"Task '{task}' completed and removed!")
                             else:
-                                st.error(f"Error: {response.text}")
-                        else:
-                            st.error("Please select a task.")
+                                st.error(f"Error updating status of '{task}'.")
+                        elif status == "In Progress":
+                            # Update task status to the selected status
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/update_status", params={
+                                "username": st.session_state.username,
+                                "project_name": st.session_state.project_name,
+                                "task_name": task,
+                                "status": status
+                            })
+                            if response.status_code == 200:
+                                st.rerun()  # Rerun to reflect status update
+                                st.success(f"Task '{task}' status updated to '{status}'.")
+                            else:
+                                st.error(f"Error updating status of '{task}'.")
+
+
+
+
+
+
+
+
+
 
     # Back, Logout, Team Settings buttons in sidebar
     
