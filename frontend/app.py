@@ -42,10 +42,10 @@ def display_login():
         st.rerun()
     
     with st.form("Login"):
-    
+
         st.subheader("Login")
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        username = st.text_input(label="", placeholder="Username")
+        password = st.text_input(label="", placeholder="Password", type="password")
 
         if st.form_submit_button("Login"):
             if login(username, password):
@@ -70,9 +70,9 @@ def display_signup():
     with st.form("Sign up", clear_on_submit = True):
         
         st.subheader("Sign Up")
-        username = st.text_input("Create Username", key="username")
-        password = st.text_input("Create Password", type="password", key="password")
-        verify_password = st.text_input("Verify Password", type="password", key="verify_password")
+        username = st.text_input(label="", placeholder="New User", key="username")
+        password = st.text_input(label="", placeholder="Password", type="password", key="password")
+        verify_password = st.text_input(label="", placeholder="Verify Password", type="password", key="verify_password")
         
         if st.form_submit_button("Sign Up"):
             signup_attempt = signup(username, password, verify_password)
@@ -90,24 +90,25 @@ def display_projects():
 
     left, middle, right = st.columns(3, vertical_alignment="center")
     middle.subheader(f"Welcome, {st.session_state.username}")
-    col1, col2 = st.columns([3, 1])
+    
+    if "visibility" not in st.session_state:
 
-    # COL1 OF HOME PAGE
-    with st.sidebar:
-        
-        project_name = st.text_input("Enter a new project name")
-        
-        if st.sidebar.button("Create Project"):
-            if project_name:
-                # THIS NEEDS TO BE IMPLEMENTED
-                response = requests.post(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username, "project_name": project_name})
-                if response.status_code == 200:
-                    st.rerun()
-                    st.success(f"Project {project_name} added!")
-                else:
-                    st.error("Project with this name already exists or invalid input.")
+        st.session_state.visibility = "collapsed"
+        st.session_state.disabled = False
+        project_name = st.text_input(label="", placeholder="Project Name")
+
+
+    if st.button("Create Project"):
+        if project_name:
+            # THIS NEEDS TO BE IMPLEMENTED
+            response = requests.post(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username, "project_name": project_name})
+            if response.status_code == 200:
+                st.rerun()
+                st.success(f"Project {project_name} added!")
             else:
-                st.error("Please enter a project name.")
+                st.error("Project with this name already exists or invalid input.")
+        else:
+            st.error("Please enter a project name.")
         
     # Fetch current projects
     st.subheader("Your Projects")
@@ -123,7 +124,7 @@ def display_projects():
             i = i + 1
 
     # COL2: Logout Button
-    with col2:
+    #with col2:
         if st.sidebar.button("Logout"):
             st.session_state.clear()
             st.rerun()
