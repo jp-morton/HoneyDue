@@ -44,8 +44,8 @@ def display_login():
     with st.form("Login", clear_on_submit=True, border=False):
 
         st.subheader("Login")
-        username = st.text_input(label="", placeholder="Username")
-        password = st.text_input(label="", placeholder="Password", type="password")
+        username = st.text_input(label="username", placeholder="Username", label_visibility="collapsed")
+        password = st.text_input(label="password", placeholder="Password", type="password", label_visibility="collapsed")
 
         if st.form_submit_button("Login"):
             if login(username, password):
@@ -70,9 +70,9 @@ def display_signup():
     with st.form("Sign up", clear_on_submit = True, border=False):
         
         st.subheader("Sign Up")
-        username = st.text_input(label="", placeholder="New User", key="username")
-        password = st.text_input(label="", placeholder="Password", type="password", key="password")
-        verify_password = st.text_input(label="", placeholder="Verify Password", type="password", key="verify_password")
+        username = st.text_input(label="user", placeholder="New User", key="username", label_visibility="collapsed")
+        password = st.text_input(label="pass", placeholder="Password", type="password", key="password", label_visibility="collapsed")
+        verify_password = st.text_input(label="verify", placeholder="Verify Password", type="password", key="verify_password", label_visibility="collapsed")
         
         if st.form_submit_button("Sign Up"):
             signup_attempt = signup(username, password, verify_password)
@@ -88,9 +88,9 @@ def display_signup():
 # Function to display projects and add new projects
 def display_projects():
 
-    left, middle, right = st.columns(3, vertical_alignment="center")
-    middle.subheader(f"Welcome, {st.session_state.username}")
-    col1, col2, col3 = st.columns([3, 2, 5])
+    left, middle, right = st.columns(3, gap="small", vertical_alignment="center")
+    middle.subheader(f"Welcome, {st.session_state.username}!")
+    col1, col2, col3 = st.columns([5, 5, 5])
 
     st.session_state.disabled = False
 
@@ -130,24 +130,24 @@ def display_projects():
 
 # Function to display tasks and add new tasks
 def display_tasks():
-    left, middle, right = st.columns(3, vertical_alignment="center")
+    left, middle, right = st.columns([5, 7, 5], vertical_alignment="center")
     middle.subheader(f"{st.session_state.project_name} Homepage")
     # col1, col2, col3, col4, col5 = st.columns([3, 2, 5, 3, 4])
-    col1, col2, col3 = st.columns([3, 2, 5])
+    col1, col2, col3 = st.columns([5, 5, 5])
 
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
     if response.status_code == 200:
         role = response.json()
 
-    
     # COL1 OF TASKS PAGE
     if "tasks" not in st.session_state:
         st.session_state.tasks = []
+
     with col1:
         # Add tasks (FOR MEMBER AND OWNER ONLY)
         if role != 'Guest':
             with st.form("Add task", clear_on_submit=True, border=False):
-                task_name = st.text_input("Task", placeholder="Enter a new task", label_visibility="collapsed")
+                task_name = st.text_input("Task", placeholder="New Task", label_visibility="collapsed")
                 if st.form_submit_button("Add Task"):
                     if task_name:
                         response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"username": st.session_state.username, "project_name": st.session_state.project_name, "task_name": task_name})
@@ -169,6 +169,27 @@ def display_tasks():
             for task in task_list:
                 st.write(f"{i}. {task['name']}")
                 i = i + 1
+
+    with col2:
+        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", params={"project_name": st.session_state.project_name})
+        if response.status_code == 200:
+            task_dict = response.json()
+            task_listed = list(task_dict)
+            task_listed.remove(st.session_state.task)
+            task = st.selectbox(f"Task to update", ["Select a task"] + task_list, label_visibility="collapsed")
+            
+            with col3:
+                with st.form("Status", clear_on_submit=True, border=False):
+                    if st.form_submit_button("Completed"):
+                        if task != 'Select a task':
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_task", params={"project_name": st.session_state.project_name, "collaborator": collaborator})
+                            if response.status_code == 200:
+                                st.rerun()
+                                st.success(f"Task has been removed.")
+                            else:
+                                st.error(f"Error: {response.text}")
+                        else:
+                            st.error("Please select a task.")
 
     # Back, Logout, Team Settings buttons in sidebar
     
