@@ -41,7 +41,7 @@ def display_login():
         st.session_state.page = "home"
         st.rerun()
     
-    with st.form("Login"):
+    with st.form("Login", clear_on_submit=True, border=False):
 
         st.subheader("Login")
         username = st.text_input(label="", placeholder="Username")
@@ -67,7 +67,7 @@ def display_signup():
         st.session_state.page = "login"
         st.rerun()
 
-    with st.form("Sign up", clear_on_submit = True):
+    with st.form("Sign up", clear_on_submit = True, border=False):
         
         st.subheader("Sign Up")
         username = st.text_input(label="", placeholder="New User", key="username")
@@ -90,25 +90,25 @@ def display_projects():
 
     left, middle, right = st.columns(3, vertical_alignment="center")
     middle.subheader(f"Welcome, {st.session_state.username}")
-    
-    if "visibility" not in st.session_state:
+    col1, col2, col3 = st.columns([3, 2, 5])
 
-        st.session_state.visibility = "collapsed"
-        st.session_state.disabled = False
-        project_name = st.text_input(label="", placeholder="Project Name")
+    st.session_state.disabled = False
 
+    with col1:
+        with st.form("Create Project", clear_on_submit=True, border=False):
+            project_name = st.text_input("Project Name", placeholder="Project Name", label_visibility="collapsed")
 
-    if st.button("Create Project"):
-        if project_name:
-            # THIS NEEDS TO BE IMPLEMENTED
-            response = requests.post(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username, "project_name": project_name})
-            if response.status_code == 200:
-                st.rerun()
-                st.success(f"Project {project_name} added!")
-            else:
-                st.error("Project with this name already exists or invalid input.")
-        else:
-            st.error("Please enter a project name.")
+            if st.form_submit_button("Create Project"):
+                if project_name:
+                    # THIS NEEDS TO BE IMPLEMENTED
+                    response = requests.post(f"{API_URL}/{st.session_state.username}", params={"username": st.session_state.username, "project_name": project_name})
+                    if response.status_code == 200:
+                        st.rerun()
+                        st.success(f"Project {project_name} added!")
+                    else:
+                        st.error("Project with this name already exists or invalid input.")
+                else:
+                    st.error("Please enter a project name.")
         
     # Fetch current projects
     st.subheader("Your Projects")
@@ -123,11 +123,9 @@ def display_projects():
                 st.rerun()
             i = i + 1
 
-    # COL2: Logout Button
-    #with col2:
-        if st.sidebar.button("Logout"):
-            st.session_state.clear()
-            st.rerun()
+    if st.sidebar.button("Logout"):
+        st.session_state.clear()
+        st.rerun()
 
 
 # Function to display tasks and add new tasks
@@ -141,24 +139,25 @@ def display_tasks():
     if response.status_code == 200:
         role = response.json()
 
+    
     # COL1 OF TASKS PAGE
     if "tasks" not in st.session_state:
         st.session_state.tasks = []
     with col1:
         # Add tasks (FOR MEMBER AND OWNER ONLY)
         if role != 'Guest':
-            task_name = st.text_input("Enter a new task")
-            
-            if st.button("Add Task"):
-                if task_name:
-                    response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"username": st.session_state.username, "project_name": st.session_state.project_name, "task_name": task_name})
-                    if response.status_code == 200:
-                        st.rerun()
-                        st.success(f'Task "{task_name}" added!')
+            with st.form("Add task", clear_on_submit=True, border=False):
+                task_name = st.text_input("Task", placeholder="Enter a new task", label_visibility="collapsed")
+                if st.form_submit_button("Add Task"):
+                    if task_name:
+                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"username": st.session_state.username, "project_name": st.session_state.project_name, "task_name": task_name})
+                        if response.status_code == 200:
+                            st.rerun()
+                            st.success(f'Task "{task_name}" added!')
+                        else:
+                            st.error(f"Error: {response.text}")
                     else:
-                        st.error(f"Error: {response.text}")
-                else:
-                    st.error("Please enter a task.")
+                        st.error("Please enter a task.")
 
         # Fetch tasks
         st.subheader("Project Tasks")
@@ -171,21 +170,19 @@ def display_tasks():
                 st.write(f"{i}. {task['name']}")
                 i = i + 1
 
-    # COL2: Back and Logout buttons
-    with col2:
-        if st.sidebar.button("Logout"):
-            st.session_state.clear()
-            st.rerun()
-
-        if st.sidebar.button("Back"):
-            del st.session_state.project_name
-            st.rerun()
+    # Back, Logout, Team Settings buttons in sidebar
     
-    # COL3: Team Settings Button
-    with col3:
-        if st.sidebar.button("Team Settings"):
-            st.session_state["team_settings"] = True
-            st.rerun()
+    if st.sidebar.button("Logout"):
+        st.session_state.clear()
+        st.rerun()
+
+    if st.sidebar.button("Back"):
+        del st.session_state.project_name
+        st.rerun()
+
+    if st.sidebar.button("Team Settings"):
+        st.session_state["team_settings"] = True
+        st.rerun()
     
 # Function to display team settings
 def display_team_settings():
@@ -220,60 +217,63 @@ def display_team_settings():
 
     if role == 'Owner':
         st.subheader("Add Collaborator")
+        with st.form("Add", clear_on_submit=True, border=False):
 
-        # Add Collaborators 
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            username_entry = st.text_input("Username: ")
+            # Add Collaborators 
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                username_entry = st.text_input(label="Username", placeholder="Username", label_visibility="collapsed")
 
-        with col2:
-            user_role = st.selectbox('Role:', ('Select a role', 'Owner', 'Member', 'Guest'))
-        
-        with col3:
-            if st.button('Add'):
-                if user_role != 'Select a role':
-                    if username_entry:
-                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"collaborator_name": username_entry, "role": user_role, "project_name": st.session_state.project_name})
-                        if response.status_code == 200:
-                            st.rerun()
-                            st.success(f'User "{username_entry}" added!')
+            with col2:
+                user_role = st.selectbox('Role:', ('Select a role', 'Owner', 'Member', 'Guest'), label_visibility="collapsed")
+            
+            with col3:
+                if st.form_submit_button("Add"):
+                    if user_role != 'Select a role':
+                        if username_entry:
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"collaborator_name": username_entry, "role": user_role, "project_name": st.session_state.project_name})
+                            if response.status_code == 200:
+                                st.rerun()
+                                st.success(f'User "{username_entry}" added!')
+                            else:
+                                error_detail = response.json().get("detail", "Error: ")
+                                st.error(error_detail)
                         else:
-                            error_detail = response.json().get("detail", "Error: ")
-                            st.error(error_detail)
+                            st.error("Please enter a username.")
                     else:
-                        st.error("Please enter a username.")
-                else:
-                    st.error("Please select a role.")
+                        st.error("Please select a role.")
 
         # Update Role
         st.subheader("Update Collaborator Role")
-        col1, col2, col3 = st.columns(3)
+        with st.form("Update", clear_on_submit=True, border=False):
+            col1, col2, col3 = st.columns(3)
 
-        with col1:
-            response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
-            if response.status_code == 200:
-                collaborator_dict = response.json()
-                collaborator_list = list(collaborator_dict.keys())
-                collaborator_list.remove(st.session_state.username)
-                collaborator = st.selectbox(f"Collaborator", ["Select a collaborator"] + collaborator_list)
+            with col1:
+                response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
+                if response.status_code == 200:
+                    collaborator_dict = response.json()
+                    collaborator_list = list(collaborator_dict.keys())
+                    collaborator_list.remove(st.session_state.username)
+                    collaborator = st.selectbox(f"Collaborator", ["Select a collaborator"] + collaborator_list, label_visibility="collapsed")
 
-        with col2:
-            new_role = st.selectbox('Role', ('Select a role', 'Owner', 'Member', 'Guest'))
+            with col2:
+                new_role = st.selectbox('Role', ('Select a role', 'Owner', 'Member', 'Guest'), label_visibility="collapsed")
 
-        with col3:
-            if st.button(f'Update'):
-                if new_role != 'Select a role':
-                    if collaborator != 'Select a collaborator':
-                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name, "collaborator": collaborator, "new_role": new_role})
-                        if response.status_code == 200:
-                            st.rerun()
-                            st.success(f"Role has been updated.")
+            with col3:
+                if st.form_submit_button(f'Update'):
+                    if new_role != 'Select a role':
+                        if collaborator != 'Select a collaborator':
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name, "collaborator": collaborator, "new_role": new_role})
+                            if response.status_code == 200:
+                                st.rerun()
+                                st.success(f"Role has been updated.")
+                            else:
+                                st.error(f"Error: {response.text}")
                         else:
-                            st.error(f"Error: {response.text}")
+                            st.error("Please select a collaborator.")
                     else:
-                        st.error("Please select a collaborator.")
-                else:
-                    st.error("Please select a role.")
+                        st.error("Please select a role.")
     
         # Remove Collaborator
         st.subheader("Remove Collaborator")
@@ -285,7 +285,7 @@ def display_team_settings():
                 collaborator_dict = response.json()
                 collaborator_list = list(collaborator_dict.keys())
                 collaborator_list.remove(st.session_state.username)
-                collaborator = st.selectbox(f"Collaborator to remove", ["Select a collaborator"] + collaborator_list)
+                collaborator = st.selectbox(f"Collaborator to remove", ["Select a collaborator"] + collaborator_list, label_visibility="collapsed")
         
         with col2:
             if st.button("Remove"):
