@@ -167,6 +167,20 @@ def display_tasks():
                             st.error(f"Error: {response.text}")
                     else:
                         st.error("Please enter a task.")
+     # Back, Logout, Settings buttons
+    if st.sidebar.button("Logout"):
+        st.session_state.clear()
+        st.rerun()
+
+    if st.sidebar.button("Back"):
+        del st.session_state.project_name
+        st.rerun()
+
+    if st.sidebar.button("Team Settings"):
+        st.session_state["team_settings"] = True
+        st.rerun()
+        
+    with st.sidebar:
         # Fetch tasks
         st.subheader("Tasks")
         response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"project_name": st.session_state.project_name})
@@ -183,18 +197,7 @@ def display_tasks():
         # CALENDAR PLACEHOLDER
         calendar()
 
-    # Back, Logout, Settings buttons
-    if st.sidebar.button("Logout"):
-        st.session_state.clear()
-        st.rerun()
-
-    if st.sidebar.button("Back"):
-        del st.session_state.project_name
-        st.rerun()
-
-    if st.sidebar.button("Team Settings"):
-        st.session_state["team_settings"] = True
-        st.rerun()
+   
     
 # Function to display team settings
 def display_team_settings():
