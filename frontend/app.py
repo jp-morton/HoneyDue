@@ -180,17 +180,17 @@ def display_tasks():
         st.session_state["team_settings"] = True
         st.rerun()
         
-    with st.sidebar:
-        # Fetch tasks
-        st.subheader("Tasks")
-        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"project_name": st.session_state.project_name})
-        if response.status_code == 200:
-            task_list = response.json()
-            i = 1
-            for task in task_list:
-                st.write(f"{i}. {task['name']}")
-                st.rerun()
-                i = i + 1
+    #with st.sidebar:
+    # Fetch tasks
+    st.subheader("Tasks")
+    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"project_name": st.session_state.project_name, "task_name": task_name})
+    if response.status_code == 200:
+        task_list = response.json()
+        i = 1
+        for task in task_list:
+            st.write(f"{i}. {task['name']}")
+            st.rerun()
+            i = i + 1
             
     with col2:
         
@@ -317,10 +317,10 @@ def display_background_image():
     background_img = """
         <style>
         [data-testid="stAppViewContainer"]{
-        background-color: #e5e5f7;
+        background-color: #FFCC00;
         opacity: 1;
-        background-image:  repeating-radial-gradient( circle at 0 0, transparent 0, #e5e5f7 40px ), repeating-linear-gradient( #d2d82455, #d2d824 );
-        }
+   
+       }
         <style>
         """
 
@@ -344,7 +344,7 @@ def display_home():
         """,
         unsafe_allow_html=True
     )
-    st.markdown('<div class="centered-title">Welcome to HoneyDue 😊! </div>', unsafe_allow_html=True)
+    st.markdown('<div class="centered-title">Welcome to HoneyDue! </div>', unsafe_allow_html=True)
    
     st.logo("https://i.pinimg.com/originals/fe/be/ca/febeca2f63bd56c127069bac2fff9323.jpg")
     
