@@ -1,9 +1,12 @@
 import streamlit as st
+from streamlit_calendar import calendar
+import pandas as pd
 import requests
 
 
 API_URL = "http://backend:8000"
 
+st.logo("https://i.pinimg.com/originals/fe/be/ca/febeca2f63bd56c127069bac2fff9323.jpg", size="large")
 # Helper function to handle user login
 def login(username, password):
     response = requests.post(f"{API_URL}/login", params={"username": username, "password": password})
@@ -28,25 +31,11 @@ def add_task(username, task_name):
 
 # Function to display login form and handle login logic
 def display_login():
+    st.subheader("Login")
+    username = st.text_input("Username", placeholder="Username", label_visibility="collapsed")
+    password = st.text_input("Password", type="password", placeholder="Password", label_visibility="collapsed")
 
-    if st.sidebar.button("Home"):
-        st.session_state.page = "home"
-        st.rerun()
-
-    if st.sidebar.button("Sign Up"):
-        st.session_state.page = "signup"
-        st.rerun()
-    
-    if st.sidebar.button("Back"):
-        st.session_state.page = "home"
-        st.rerun()
-    
-    with st.form("Login", border=False):
-
-        st.subheader("Login")
-        username = st.text_input(label="username", placeholder="Username", label_visibility="collapsed")
-        password = st.text_input(label="password", placeholder="Password", type="password", label_visibility="collapsed")
-
+    with st.form("Login", clear_on_submit=True, border=False):
         if st.form_submit_button("Login"):
             if login(username, password):
                 st.session_state.logged_in = True
@@ -55,35 +44,40 @@ def display_login():
                 st.success("Logged in successfully!")
             else:
                 st.error("Invalid username or password")
-
-# Function to display signup form and handle account creation
-def display_signup():
-
-    if st.sidebar.button("Home"):
+    
+    # Add "Back" button to return to home page
+    if st.sidebar.button("Back"):
         st.session_state.page = "home"
         st.rerun()
 
+# Function to display signup form and handle account creation
+def display_signup():
+    st.subheader("Sign Up")
+    username = st.text_input("Create Username", placeholder= "New User", label_visibility="collapsed")
+    password = st.text_input("Create Password", type="password", placeholder="Create Password", label_visibility="collapsed")
+    verify_password = st.text_input("Confirm Password", type="password", placeholder="Confirm Password", label_visibility="collapsed")
+
+    with st.form("Sign Up", clear_on_submit=True, border=False):
+        if st.form_submit_button("Sign Up"):
+            if verify_password == password:
+                signup_attempt = signup(username, password)
+                if signup_attempt.ok:
+                    st.success("Account created successfully! Please log in.")
+                else:
+                    error_detail = signup_attempt.json().get("detail", "Error: ")
+                    st.error(error_detail)
+            else:
+                st.error("Password mismatch")
+    
+    # Add "Back" button to return to home page
+    if st.sidebar.button("Back"):
+        st.session_state.page = "home"
+        st.rerun()
+   
+    # Add "Back" button to return to previous page
     if st.sidebar.button("Login"):
         st.session_state.page = "login"
         st.rerun()
-
-    with st.form("Sign up", clear_on_submit = True, border=False):
-        
-        st.subheader("Sign Up")
-        username = st.text_input(label="user", placeholder="New User", key="username", label_visibility="collapsed")
-        password = st.text_input(label="pass", placeholder="Password", type="password", key="password", label_visibility="collapsed")
-        verify_password = st.text_input(label="verify", placeholder="Verify Password", type="password", key="verify_password", label_visibility="collapsed")
-        
-        if st.form_submit_button("Sign Up"):
-            signup_attempt = signup(username, password, verify_password)
-            if password == verify_password:
-                if signup_attempt.ok:
-                    st.success("Account created successfully! Please log in.")
-                    
-            else:
-                error_detail = signup_attempt.json().get("detail", "Error: ")
-                st.error(error_detail)
-                    
 
 # Function to display projects and add new projects
 def display_projects():
@@ -95,9 +89,9 @@ def display_projects():
     st.session_state.disabled = False
 
     with col1:
-        with st.form("Create Project", clear_on_submit=True, border=False):
-            project_name = st.text_input("Project Name", placeholder="Project Name", label_visibility="collapsed")
-
+        project_name = st.text_input("Enter a new project name", placeholder="New Project", label_visibility="collapsed")
+        
+        with st.form("New Project", clear_on_submit=True, border=False):
             if st.form_submit_button("Create Project"):
                 if project_name:
                     # THIS NEEDS TO BE IMPLEMENTED
@@ -130,24 +124,28 @@ def display_projects():
 
 # Function to display tasks and add new tasks
 def display_tasks():
-
-    left, middle, right = st.columns([5, 7, 5], vertical_alignment="center")
-    middle.subheader(f"{st.session_state.project_name} Homepage")
-    col1, col2, col3 = st.columns([5, 5, 5])
+    st.subheader(f"{st.session_state.project_name} Homepage")
+    
+    col1, col2, col3 = st.columns([3, 2, 5])
 
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
     if response.status_code == 200:
         role = response.json()
 
-    # COL1 OF TASKS PAGE
+    with col1:
+        # CALENDAR PLACEHOLDER
+        calendar()
+
+
+    # COL2 OF TASKS PAGE
     if "tasks" not in st.session_state:
         st.session_state.tasks = []
-
     with col1:
         # Add tasks (FOR MEMBER AND OWNER ONLY)
         if role != 'Guest':
-            with st.form("Add task", clear_on_submit=True, border=False):
-                task_name = st.text_input("Task", placeholder="New Task", label_visibility="collapsed")
+            task_name = st.text_input("Enter a new task", placeholder="New Task", label_visibility="collapsed")
+
+            with st.form("Add Task", clear_on_submit=True, border=False):
                 if st.form_submit_button("Add Task"):
                     if task_name:
                         response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"username": st.session_state.username, "project_name": st.session_state.project_name, "task_name": task_name})
@@ -167,75 +165,24 @@ def display_tasks():
             task_list = response.json()
             i = 1
             for task in task_list:
-                task['status'] = "Not Started"
-                st.write(f"{i}. {task['name']} -- {task['status']}")
+                st.write(f"{i}. {task['name']}")
                 i = i + 1
 
+    # COL2: Back and Logout buttons
+    with col2:
+        if st.sidebar.button("Logout"):
+            st.session_state.clear()
+            st.rerun()
 
-
-    with col3:
-        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}", params={"project_name": st.session_state.project_name})
-        if response.status_code == 200:
-            task_dict = response.json()
-            task_names = [task['name'] for task in task_dict]
-            task = st.selectbox(f"Task to update", ["Select a task"] + task_names, label_visibility="collapsed")
-
-            if task != "Select a task":
-                with st.form("Update Status", clear_on_submit=True, border=False):
-                    status = st.selectbox("Select Status", ['','In Progress', 'Completed'], label_visibility="collapsed")
-                    if st.form_submit_button("Update Status"):
-                        if status == "Completed":
-                            # Remove task if completed
-                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_task", params={
-                                "username": st.session_state.username,
-                                "project_name": st.session_state.project_name,
-                                "task_name": task,
-                                "status": status
-                            })
-                            if response.status_code == 200:
-                                task_dict = response.json()
-                                task_list = list(task_dict.keys(task["task_name"], task["status"]))
-                                task_list.remove(task["task_name"])
-                                st.rerun()  # Rerun to reflect task removal
-                                st.success(f"Task '{task}' completed and removed!")
-                            else:
-                                st.error(f"Error updating status of '{task}'.")
-                        elif status == "In Progress":
-                            # Update task status to the selected status
-                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/update_status", params={
-                                "username": st.session_state.username,
-                                "project_name": st.session_state.project_name,
-                                "task_name": task,
-                                "status": status
-                            })
-                            if response.status_code == 200:
-                                st.rerun()  # Rerun to reflect status update
-                                st.success(f"Task '{task}' status updated to '{status}'.")
-                            else:
-                                st.error(f"Error updating status of '{task}'.")
-
-
-
-
-
-
-
-
-
-
-    # Back, Logout, Team Settings buttons in sidebar
+        if st.sidebar.button("Back"):
+            del st.session_state.project_name
+            st.rerun()
     
-    if st.sidebar.button("Logout"):
-        st.session_state.clear()
-        st.rerun()
-
-    if st.sidebar.button("Back"):
-        del st.session_state.project_name
-        st.rerun()
-
-    if st.sidebar.button("Team Settings"):
-        st.session_state["team_settings"] = True
-        st.rerun()
+    # COL3: Team Settings Button
+    with col3:
+        if st.sidebar.button("Team Settings"):
+            st.session_state["team_settings"] = True
+            st.rerun()
     
 # Function to display team settings
 def display_team_settings():
@@ -243,16 +190,11 @@ def display_team_settings():
     col1, col2 = st.columns([4, 2])
     with col1:
         st.title(st.session_state.project_name + " Team Settings")
-
-    # Add Log out button
-    if st.sidebar.button("Logout"):
-        st.session_state.clear()
-        st.rerun()
-
-    # Return button
-    if st.sidebar.button("Back"):
-        del st.session_state["team_settings"]
-        st.rerun()
+    with col2:
+        # Return button
+        if st.sidebar.button("Return"):
+            del st.session_state["team_settings"]
+            st.rerun()
 
     # Team Member List
     st.subheader("Team Members")
@@ -261,7 +203,6 @@ def display_team_settings():
         collaborator_dict = response.json()
         for collaborator, role in collaborator_dict.items():
             st.write(f"{collaborator} : {role}")
-
 
     # OWNER ONLY
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
@@ -385,7 +326,9 @@ def display_home():
         unsafe_allow_html=True
     )
     st.markdown('<div class="centered-title">Welcome to HoneyDue 😊! </div>', unsafe_allow_html=True)
-
+   
+    st.logo("https://i.pinimg.com/originals/fe/be/ca/febeca2f63bd56c127069bac2fff9323.jpg")
+    
     #Centered the buttons to the screen
     col1, col2, col3 = st.columns([.60,.50,1])
     
@@ -418,7 +361,10 @@ def main():
         </style>
         """,
         unsafe_allow_html=True
-    )   
+    ) 
+    col1, col2, col3 = st.columns(3)
+    with col2:
+        st.image("https://i.pinimg.com/originals/fe/be/ca/febeca2f63bd56c127069bac2fff9323.jpg",width=200) 
     st.markdown('<div class="header-title">HoneyDue</div>', unsafe_allow_html=True)
     
     if "logged_in" not in st.session_state:
@@ -431,6 +377,8 @@ def main():
     if "project_name" in st.session_state:
         if "team_settings" in st.session_state:
             display_team_settings()
+        elif "task_list" in st.session_state:
+            display_task_list()
         else:
             display_tasks()
     elif st.session_state.logged_in:

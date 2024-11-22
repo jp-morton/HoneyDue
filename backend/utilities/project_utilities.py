@@ -96,15 +96,110 @@ class Project_Utilities:
             project_obj = pickle.loads(serialized_project)
             return project_obj.tasks
 
-    # Name: get_project_owner
-    # Description: Retrieves the username of the project owner
+    # Name: add_category
+    # Description: Adds a category to a particular project
+    # Input: 
+    #   task: The name of the category being added to the project 
+    #   project_name: The name of the project that the category is being added to 
+    def add_category(category_name: str, project_name: str):
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
+            if project_name not in project_data:
+                raise ValueError(f"Project '{project_name}' not found.")
+
+            try:
+                serialized_project = project_data[project_name][()]
+                project_obj = pickle.loads(serialized_project)
+            except:
+                raise ValueError(f"Error loading project '{project_name}'")
+
+            project_obj.categories.append(category_name)
+            serialized_project = pickle.dumps(project_obj)
+            del project_data[project_name]
+            project_data.create_dataset(project_name, data=np.void(serialized_project))
+
+    # Name: get_category_list
+    # Description: Retrieves the list of categories for a particular project
     # Input
-    #   project_name: The name of the project whose owner is being retrieved 
-    def get_project_owner(project_name: str):
+    #   project_name: The name of the project whose category list is being retrieved
+    def get_category_list(project_name: str):
         with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
-            return project_obj.owner
+            return project_obj.categories
+
+    # Name: category_exists
+    # Description: Checks to see if a category exists
+    # Input:
+    #   category_name: The category name being searched for
+    #   project_name: The project being searched in
+    # Output:
+    #   True if the category already exists
+    #   False if the category does not already exist
+    def category_exists(category_name: str, project_name: str):
+        category_list = Project_Utilities.get_category_list(project_name)
+        for category in category_list:
+            if category_name == category:
+                return True
+        return False
+    
+    # Name: update_task_list
+    # Description: Updates a project's task list 
+    # Input: 
+    #   project_name: The name of the project whose tasks are being updated
+    #   task_list: A list of dictionaries, each of which contain the contents of a task object in the project
+    def update_task_list(project_name: str, task_list: list[dict]):
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
+            if project_name not in project_data:
+                raise ValueError(f"Project '{project_name}' not found.")
+
+            try:
+                serialized_project = project_data[project_name][()]
+                project_obj = pickle.loads(serialized_project)
+            except:
+                raise ValueError(f"Error loading project '{project_name}'")
+            
+            project_obj.tasks = []
+            for task in task_list:
+                task_obj = Task(
+                    name=task.get('name'), 
+                    description=task.get('description'),
+                    priority=task.get('priority'), 
+                    deadline=task.get('deadline'), 
+                    category=task.get('category'),
+                    status=task.get('status'),
+                    assignee=task.get('assignee')
+                )
+                project_obj.tasks.append(task_obj)
+
+            serialized_project = pickle.dumps(project_obj)
+            del project_data[project_name]
+            project_data.create_dataset(project_name, data=np.void(serialized_project))
+
+    # Name: remove_category
+    # Description: Deletes a category from a project 
+    # Input: 
+    #   project_name: The name of the project whose category is being deleted
+    #   category_name: The name of the category being deleted
+    def remove_category(project_name: str, category_name: str):
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
+            if project_name not in project_data:
+                raise ValueError(f"Project '{project_name}' not found.")
+
+            try:
+                serialized_project = project_data[project_name][()]
+                project_obj = pickle.loads(serialized_project)
+            except:
+                raise ValueError(f"Error loading project '{project_name}'")
+            
+            for task in project_obj.tasks:
+                if task.category == category_name:
+                    task.category = "None"
+
+            project_obj.remove_category(category_name)
+
+            serialized_project = pickle.dumps(project_obj)
+            del project_data[project_name]
+            project_data.create_dataset(project_name, data=np.void(serialized_project))
 
     # Name: get_user_role
     # Description: Returns a user's role in a particular project
@@ -159,3 +254,138 @@ class Project_Utilities:
             project_data.create_dataset(project_name, data=np.void(serialized_project))
 
             Account_Utilities.remove_project(project_name, collaborator)
+
+
+
+
+
+    #################################################
+    # THE FOLLOWING FUNCTION IS TO RESET THE DATABASE
+    #################################################
+
+    def reset():
+        project_data = h5py.File('/app/database/project_data.hdf5', 'w')
+
+        #################
+        ### PROJECT 1 ###
+        #################
+        Project1 = Project('Project1', 'user1')
+        Project_Utilities.add_project(Project1)
+
+        # Add collaborators to project 1
+        Project_Utilities.add_collaborator('user2', 'Member', 'Project1')
+        Project_Utilities.add_collaborator('user3', 'Member', 'Project1')
+        Project_Utilities.add_collaborator('user4', 'Guest', 'Project1')
+
+        # Add categories to project 1
+        Project_Utilities.add_category("Category1", 'Project1')
+        Project_Utilities.add_category("Category2", 'Project1')
+        Project_Utilities.add_category("Category3", 'Project1')
+
+        # Add tasks to project 1
+        task1 = Task(name="Task1", description="This is a test task called Task1 in None", priority=2, deadline="2024-12-25", category="None", status="TODO", assignee="user1")
+        task2 = Task(name="Task2", description="This is a test task called Task2 in Category1", priority=3, deadline="2024-12-21", category="Category1", status="DONE", assignee="user2")
+        task3 = Task(name="Task3", description="This is a test task called Task3 in Category1", priority=1, deadline="2025-01-04", category="Category1", status="TODO", assignee="user3")
+        task4 = Task(name="Task4", description="This is a test task called Task4 in Category2", priority=4, deadline="2025-01-11", category="Category2", status="TODO", assignee="user1")
+        task5 = Task(name="Task5", description="This is a test task called Task5 in Category2", priority=5, deadline="2024-12-15", category="Category2", status="DOING", assignee="user3")
+        task6 = Task(name="Task6", description="This is a test task called Task6 in Category3", priority=2, deadline="2025-12-31", category="Category3", status="DOING", assignee="user2")
+
+        Project_Utilities.add_task(task1, 'Project1')
+        Project_Utilities.add_task(task2, 'Project1')
+        Project_Utilities.add_task(task3, 'Project1')
+        Project_Utilities.add_task(task4, 'Project1')
+        Project_Utilities.add_task(task5, 'Project1')
+        Project_Utilities.add_task(task6, 'Project1')
+
+        #################
+        ### PROJECT 2 ###
+        #################
+        Project2 = Project('Project2', 'user2')
+        Project_Utilities.add_project(Project2)
+
+        # Add collaborators to project 2
+        Project_Utilities.add_collaborator('user1', 'Member', 'Project2')
+        Project_Utilities.add_collaborator('user3', 'Owner', 'Project2')
+        Project_Utilities.add_collaborator('user4', 'Member', 'Project2')
+
+        # Add categories to project 2
+        Project_Utilities.add_category("Cat1", 'Project2')
+        Project_Utilities.add_category("Cat2", 'Project2')
+        Project_Utilities.add_category("Cat3", 'Project2')
+
+        # Add tasks to project 2
+        task1 = Task(name="Task1", description="This is a test task called Task1", priority=2, deadline="2024-12-25", category="Cat3", status="TODO", assignee="user1")
+        task2 = Task(name="Task1", description="This is a test task called Task1", priority=3, deadline="2024-12-21", category="Cat3", status="DONE", assignee="user2")
+        task3 = Task(name="Task1", description="This is a test task called Task1", priority=1, deadline="2025-01-04", category="Cat2", status="TODO", assignee="user3")
+        task4 = Task(name="Task1", description="This is a test task called Task1", priority=4, deadline="2025-01-11", category="Cat1", status="TODO", assignee="user1")
+        task5 = Task(name="Task2", description="This is a test task called Task2", priority=5, deadline="2024-12-15", category="None", status="DOING", assignee="user3")
+        task6 = Task(name="Task2", description="This is a test task called Task2", priority=2, deadline="2025-12-31", category="None", status="TODO", assignee="user4")
+
+        Project_Utilities.add_task(task1, 'Project2')
+        Project_Utilities.add_task(task2, 'Project2')
+        Project_Utilities.add_task(task3, 'Project2')
+        Project_Utilities.add_task(task4, 'Project2')
+        Project_Utilities.add_task(task5, 'Project2')
+        Project_Utilities.add_task(task6, 'Project2')
+
+        #################
+        ### PROJECT 3 ###
+        #################
+        Project3 = Project('Project3', 'user3')
+        Project_Utilities.add_project(Project3)
+
+        # Add collaborators to project 3
+        Project_Utilities.add_collaborator('user1', 'Guest', 'Project3')
+        Project_Utilities.add_collaborator('user2', 'Guest', 'Project3')
+        Project_Utilities.add_collaborator('user4', 'Member', 'Project3')
+
+        # Add categories to project 3
+        Project_Utilities.add_category("C1", 'Project3')
+        Project_Utilities.add_category("C2", 'Project3')
+        Project_Utilities.add_category("C3", 'Project3')
+
+        # Add tasks to project 3
+        task1 = Task(name="Task1", description="This is a test task called Task1", priority=2, deadline="2024-12-25", category="C2", status="DOING", assignee="user4")
+        task2 = Task(name="Task1", description="This is a test task called Task1", priority=3, deadline="2024-12-21", category="C2", status="TODO", assignee="user3")
+        task3 = Task(name="Task1", description="This is a test task called Task1", priority=1, deadline="2025-01-04", category="C3", status="DONE", assignee="user3")
+        task4 = Task(name="Task1", description="This is a test task called Task1", priority=4, deadline="2025-01-11", category="C3", status="DONE", assignee="user3")
+        task5 = Task(name="Task2", description="This is a test task called Task2", priority=5, deadline="2024-12-15", category="None", status="TODO", assignee="user3")
+        task6 = Task(name="Task2", description="This is a test task called Task2", priority=2, deadline="2025-12-31", category="C1", status="DOING", assignee="user4")
+
+        Project_Utilities.add_task(task1, 'Project3')
+        Project_Utilities.add_task(task2, 'Project3')
+        Project_Utilities.add_task(task3, 'Project3')
+        Project_Utilities.add_task(task4, 'Project3')
+        Project_Utilities.add_task(task5, 'Project3')
+        Project_Utilities.add_task(task6, 'Project3')
+
+        #################
+        ### PROJECT 4 ###
+        #################
+        Project4 = Project('Project4', 'user4')
+        Project_Utilities.add_project(Project4)
+
+        # Add collaborators to project 4
+        Project_Utilities.add_collaborator('user1', 'Owner', 'Project4')
+        Project_Utilities.add_collaborator('user2', 'Guest', 'Project4')
+        Project_Utilities.add_collaborator('user3', 'Member', 'Project4')
+
+        # Add categories to project 4
+        Project_Utilities.add_category("Feature1", 'Project4')
+        Project_Utilities.add_category("Feature2", 'Project4')
+        Project_Utilities.add_category("Feature3", 'Project4')
+
+        # Add tasks to project 4
+        task1 = Task(name="Task1", description="This is a test task called Task1", priority=2, deadline="2024-12-25", category="Feature1", status="TODO", assignee="user4")
+        task2 = Task(name="Task1", description="This is a test task called Task1", priority=3, deadline="2024-12-21", category="Feature1", status="DOING", assignee="user3")
+        task3 = Task(name="Task1", description="This is a test task called Task1", priority=1, deadline="2025-01-04", category="Feature2", status="DONE", assignee="user1")
+        task4 = Task(name="Task1", description="This is a test task called Task1", priority=4, deadline="2025-01-11", category="Feature2", status="DONE", assignee="user1")
+        task5 = Task(name="Task2", description="This is a test task called Task2", priority=5, deadline="2024-12-15", category="Feature3", status="DONE", assignee="user4")
+        task6 = Task(name="Task2", description="This is a test task called Task2", priority=2, deadline="2025-12-31", category="Feature3", status="TODO", assignee="user4")
+
+        Project_Utilities.add_task(task1, 'Project4')
+        Project_Utilities.add_task(task2, 'Project4')
+        Project_Utilities.add_task(task3, 'Project4')
+        Project_Utilities.add_task(task4, 'Project4')
+        Project_Utilities.add_task(task5, 'Project4')
+        Project_Utilities.add_task(task6, 'Project4')

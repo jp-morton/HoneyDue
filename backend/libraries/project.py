@@ -1,5 +1,4 @@
 from libraries.user import User, Role
-from libraries.category import Category
 
 class Project:
     
@@ -8,7 +7,7 @@ class Project:
         self.description = ""
         self.collaborators = {owner : Role.OWNER}
         self.tasks = []
-        self.categories = []
+        self.categories = ["None"]
     
     def set_name(self, new_name):
         self.name = new_name
@@ -34,3 +33,7 @@ class Project:
 
     def remove_collaborator(self, collaborator: str):
         del self.collaborators[collaborator]
+
+    def remove_category(self, category: str):
+        self.categories.remove(category)
+
