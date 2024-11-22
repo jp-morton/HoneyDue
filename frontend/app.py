@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from streamlit_calendar import calendar
 import pandas as pd
 import requests
@@ -82,13 +83,10 @@ def display_signup():
 # Function to display projects and add new projects
 def display_projects():
 
-    left, middle, right = st.columns(3, gap="small", vertical_alignment="center")
-    
     col1, col2, col3 = st.columns([5, 5, 5])
-
     st.session_state.disabled = False
 
-    with col1:
+    with col2:
         st.subheader(f"Welcome, {st.session_state.username}!")
         with st.form("New Project", clear_on_submit=True, border=False):
             project_name = st.text_input("Enter a new project name", placeholder="New Project", label_visibility="collapsed")
@@ -104,7 +102,24 @@ def display_projects():
                 else:
                     st.error("Please enter a project name.")
 
-    with col3:    
+    components.html(
+        """
+        <script>
+        const elements = window.parent.document.querySelectorAll('.stButton > button')
+        elements[0].style.backgroundColor = 'gold'
+        </script>
+            """, 
+            height=0,
+            width=0
+    )
+   
+    if st.sidebar.button("Logout"):
+        st.session_state.clear()
+        st.rerun()
+
+
+
+    with st.sidebar:    
         # Fetch current projects
         st.subheader("Your Projects")
 
@@ -117,11 +132,6 @@ def display_projects():
                     st.session_state.project_name = project
                     st.rerun()
                 i = i + 1
-
-    if st.sidebar.button("Logout"):
-        st.session_state.clear()
-        st.rerun()
-
 
 # Function to display tasks and add new tasks
 def display_tasks():
@@ -192,20 +202,24 @@ def display_team_settings():
     col1, col2 = st.columns([4, 2])
     with col1:
         st.title(st.session_state.project_name + " Team Settings")
-    with col2:
-        # Return button
-        if st.sidebar.button("Return"):
-            del st.session_state["team_settings"]
-            st.rerun()
+    
+    if st.sidebar.button("Logout"):
+        st.session_state.clear()
+        st.rerun()
+    # Return button
+    if st.sidebar.button("Back"):
+        del st.session_state["team_settings"]
+        st.rerun()
 
-    # Team Member List
-    st.subheader("Team Members")
-    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
-    if response.status_code == 200:
-        collaborator_dict = response.json()
-        for collaborator, role in collaborator_dict.items():
-            st.write(f"{collaborator} : {role}")
-
+    with st.sidebar:
+        # Team Member List
+        st.subheader("Team Members")
+        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
+        if response.status_code == 200:
+            collaborator_dict = response.json()
+            for collaborator, role in collaborator_dict.items():
+                st.write(f"{collaborator} : {role}")
+    
     # OWNER ONLY
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
     if response.status_code == 200:
