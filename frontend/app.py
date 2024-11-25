@@ -61,7 +61,7 @@ def display_signup():
 
         if st.form_submit_button("Sign Up"):
             if verify_password == password:
-                signup_attempt = signup(username, password)
+                signup_attempt = signup(username, password, verify_password)
                 if signup_attempt.ok:
                     st.success("Account created successfully! Please log in.")
                 else:
