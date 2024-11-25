@@ -117,8 +117,6 @@ def display_projects():
         st.session_state.clear()
         st.rerun()
 
-
-
     with st.sidebar:    
         # Fetch current projects
         st.subheader("Your Projects")
@@ -154,21 +152,17 @@ def display_tasks():
         st.rerun()
 
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2= st.columns(2)
     
 
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
     if response.status_code == 200:
         role = response.json()
 
-    with col1:
-        # CALENDAR PLACEHOLDER
-        calendar()
-
     # COL2 OF TASKS PAGE
     if "tasks" not in st.session_state:
         st.session_state.tasks = []
-    with col2:
+    with col1:
         # Add tasks (FOR MEMBER AND OWNER ONLY)
         if role != 'Guest':
             with st.expander("Add Task"):
@@ -218,8 +212,11 @@ def display_tasks():
                             st.success(f'Task "{task_name}" added!')
                         else:
                             st.error(f"Error: {response.text}")
+    with col2:
+        # CALENDAR PLACEHOLDER
+        calendar()
     
-    with col3:
+    with st.sidebar:
         # Add categories (FOR MEMBER AND OWNER ONLY)
         if role != 'Guest':
             with st.expander("Add Category"):
@@ -241,7 +238,7 @@ def display_tasks():
 
 def display_task_list():
     # Back button
-    if st.button("Back"):
+    if st.sidebar.button("Back"):
         del st.session_state["task_list"]
         st.rerun()
     
@@ -321,39 +318,45 @@ def display_task_list():
         # Task dataframe
         st.dataframe(task_list, use_container_width=True)
 
+    with st.sidebar:
     # Category Management
-    st.subheader("Categories")
+        st.subheader("Categories")
 
-    i = 1
-    for category in filtered_category_list:
-        st.write(f"{i}. {category}")
-        i = i + 1
+        i = 1
+        for category in filtered_category_list:
+            st.write(f"{i}. {category}")
+            i = i + 1
 
     if role != "Guest":
-        col1, col2 = st.columns(2)
+        st.subheader("Add Category")
+        with st.form("Add", clear_on_submit=True, border=False):
+            col1, col2 = st.columns(2)
 
-        with col1:
-            category_entry = st.text_input("Category: ")
-        
-        with col2:
-            if st.button('Add'):
-                if category_entry:
-                    if category_entry in category_list:
-                        st.error(f"Category '{category_entry}' already exists")
-                    else:
-                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
-                        if response.status_code == 200:
-                            st.rerun()
-                            st.success(f'Category "{category_entry}" added!')
+            with col1:
+                category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed" )
+            
+            with col2:
+                if st.form_submit_button("Add"):
+                    if category_entry:
+                        if category_entry in category_list:
+                            st.error(f"Category '{category_entry}' already exists")
                         else:
-                            st.error("There was an error adding the category")
-                else:
-                    st.error("Please enter a category name")
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
+                            if response.status_code == 200:
+                                st.rerun()
+                                st.success(f'Category "{category_entry}" added!')
+                            else:
+                                st.error("There was an error adding the category")
+                    else:
+                        st.error("Please enter a category name")
+        
+
         
         col1, col2 = st.columns(2)
         
         with col1:
-            selected_category = st.selectbox(f"Category", ["Select a category"] + filtered_category_list)
+
+            selected_category = st.selectbox(f"", ["Select a category"] + filtered_category_list, label_visibility="collapsed")
 
         with col2:
             if st.button("Remove"):
