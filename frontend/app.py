@@ -484,21 +484,6 @@ def display_team_settings():
                 else:
                     st.error("Please select a collaborator.")
 
-# The Theme of the project. 
-def display_background_image():
-    background_img = """
-        <style>
-        [data-testid="stAppViewContainer"]{
-        background-color: #FFCC00;
-        opacity: 1;
-   
-       }
-        <style>
-        """
-
-        # Add custom CSS for background color
-    st.markdown(background_img, unsafe_allow_html=True)
-
 
 # Home page to choose between login or signup
 def display_home():
@@ -535,9 +520,6 @@ def display_home():
 
 # Main application
 def main():
-
-    #Displaying the background image
-    display_background_image()
 
     #Each screen will have the HoneyDue sign on the top
     st.markdown(
