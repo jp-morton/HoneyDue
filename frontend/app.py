@@ -32,6 +32,9 @@ def add_task(username, task_name):
 
 # Function to display login form and handle login logic
 def display_login():
+
+    display_company_logo()
+
     st.subheader("Login")
     with st.form("Login", clear_on_submit=True, border=False):
         username = st.text_input("Username", placeholder="Username", label_visibility="collapsed")
@@ -53,6 +56,9 @@ def display_login():
 
 # Function to display signup form and handle account creation
 def display_signup():
+
+    display_company_logo()
+
     st.subheader("Sign Up")
     with st.form("Sign Up", clear_on_submit=True, border=False):
         username = st.text_input("Create Username", placeholder= "New User", label_visibility="collapsed")
@@ -82,6 +88,8 @@ def display_signup():
 
 # Function to display projects and add new projects
 def display_projects():
+
+    display_company_logo()
 
     col1, col2, col3 = st.columns([5, 5, 5])
     st.session_state.disabled = False
@@ -151,9 +159,26 @@ def display_tasks():
         st.session_state["task_list"] = True
         st.rerun()
 
+    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
+    if response.status_code == 200:
+        role = response.json()
 
-    col1, col2= st.columns(2)
+    # CALENDAR PLACEHOLDER
+    calendar()
+
+def display_task_list():
+
+    # Log out button
+    if st.sidebar.button("Logout"):
+        st.session_state.clear()
+        st.rerun()
+        
+    # Back button
+    if st.sidebar.button("Back"):
+        del st.session_state["task_list"]
+        st.rerun()
     
+    col1, col2 = st.columns(2)
 
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
     if response.status_code == 200:
@@ -165,46 +190,49 @@ def display_tasks():
     with col1:
         # Add tasks (FOR MEMBER AND OWNER ONLY)
         if role != 'Guest':
-            with st.expander("Add Task"):
-                task_name = st.text_input("Task Name")
-                task_description = st.text_area("Task Description", value="None")
-                priority = st.number_input("Priority", min_value=1, max_value=5, value=1)
-                deadline = st.date_input("Deadline")
+            with st.form("Add Task", clear_on_submit=True, border=False):
+                with st.expander("Add Tasks"):
+                    task_name = st.text_input("Task Name", placeholder="Task Name", label_visibility="collapsed")
+                    task_description = st.text_area("Task Description", placeholder="Task Description", label_visibility="collapsed")
+                    priority = st.number_input("Priority", min_value=1, max_value=5, value=1)
+                    deadline = st.date_input("Deadline")
+                    #status = "TODO"
 
-                response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
-                if response.status_code == 200:
-                    category_list = response.json()
-                    category = st.selectbox(f"Category", category_list)
+                    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
+                    if response.status_code == 200:
+                        category_list = response.json()
+                        category = st.selectbox(f"Category", category_list, index=None, placeholder="Category", label_visibility="collapsed")
 
-                status = st.selectbox("Task Status", options=["TODO", "DOING", "DONE"])
+                    
+                    status = st.selectbox("Task Status", options=["TODO", "DOING", "DONE"], index=None, placeholder="Task Status", label_visibility= "collapsed")
 
-                response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
-                if response.status_code == 200:
-                    collaborator_dict = response.json()
-                    collaborator_list = list(collaborator_dict.keys())
-                    collaborator_list.remove(st.session_state.username)
-                    assignee = st.selectbox(f"Assignee", ["Assign to me"] + collaborator_list)
+                    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
+                    if response.status_code == 200:
+                        collaborator_dict = response.json()
+                        collaborator_list = list(collaborator_dict.keys())
+                        collaborator_list.remove(st.session_state.username)
+                        assignee = st.selectbox(f"Assignee", ["Assign to me"] + collaborator_list, index=None, placeholder="Assign To" ,label_visibility="collapsed")
 
                 
-                if st.button("Add Task"):
-                    if not task_name:
-                        st.error("Please enter a task name")
-                    elif not task_description:
-                        st.error("Please enter a task description")
-                    else:
-                        if assignee == "Assign to me":
-                            assignee = st.session_state.username
+                    if st.form_submit_button("Add Task"):
+                        if not task_name:
+                            st.error("Please enter a task name")
+                        elif not task_description:
+                            st.error("Please enter a task description")
+                        else:
+                            if assignee == "Assign to me":
+                                assignee = st.session_state.username
 
-                        task_data = {
-                            "project_name": st.session_state.project_name,
-                            "task_name": task_name, 
-                            "description": task_description, 
-                            "priority": str(priority), 
-                            "deadline": deadline.isoformat(), 
-                            "category": category, 
-                            "status": status, 
-                            "assignee": assignee
-                        }
+                            task_data = {
+                                "project_name": st.session_state.project_name,
+                                "task_name": task_name, 
+                                "description": task_description, 
+                                "priority": str(priority), 
+                                "deadline": deadline.isoformat(), 
+                                "category": category, 
+                                "status": status, 
+                                "assignee": assignee
+                            }
 
                         response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", json=task_data)
                         if response.status_code == 200:
@@ -212,37 +240,29 @@ def display_tasks():
                             st.success(f'Task "{task_name}" added!')
                         else:
                             st.error(f"Error: {response.text}")
-    with col2:
-        # CALENDAR PLACEHOLDER
-        calendar()
-    
-    with st.sidebar:
-        # Add categories (FOR MEMBER AND OWNER ONLY)
-        if role != 'Guest':
-            with st.expander("Add Category"):
-                category_name = st.text_input("Category Name")
 
-                if st.button("Add Category"):
-                    if category_name:
-                        if category_name not in category_list:
-                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_name})
+   
+    if role != "Guest":
+        
+        with st.sidebar.form("Add", clear_on_submit=True, border=False):
+            
+                category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed" )
+
+                if st.form_submit_button("Add"):
+                    if category_entry:
+                        if category_entry in category_list:
+                            st.error(f"Category '{category_entry}' already exists")
+                        else:
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
                             if response.status_code == 200:
                                 st.rerun()
-                                st.success(f'Category "{category_name}" added!')
+                                st.success(f'Category "{category_entry}" added!')
                             else:
-                                st.error(response.text)
-                        else:
-                            st.error(f"Category '{category_name}' already exists")
+                                st.error("There was an error adding the category")
                     else:
-                        st.error("Please enter a name")
+                        st.error("Please enter a category name")
 
-def display_task_list():
-    # Back button
-    if st.sidebar.button("Back"):
-        del st.session_state["task_list"]
-        st.rerun()
-    
-    st.subheader("Tasks")
+    # st.subheader("Tasks")
 
     # Get user role
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
@@ -275,7 +295,7 @@ def display_task_list():
         status_order = ["TODO", "DOING", "DONE"]
         df["status"] = pd.Categorical(df["status"], categories=status_order, ordered=True)
         df["deadline"] = pd.to_datetime(df["deadline"])
-
+        
         column_config = {
             "priority": st.column_config.SelectboxColumn(label="Task Priority", options=["1", "2", "3", "4", "5"],),
             "category": st.column_config.SelectboxColumn(label="Category", options=category_list,),
@@ -284,7 +304,7 @@ def display_task_list():
             "deadline": st.column_config.DateColumn(label="Deadline"),
         }
 
-        sort_by = st.selectbox("Sort Tasks", options=df.columns.tolist(), index=0)
+        sort_by = st.selectbox("Sort Tasks", placeholder="Sort Tasks", options=df.columns.tolist(), index=0, label_visibility="collapsed")
         sort_order = st.radio("Task order", options=["Ascending", "Descending"], index=0)
         ascending = True if sort_order == "Ascending" else False
         df_sorted = df.sort_values(by=sort_by, ascending=ascending)
@@ -316,8 +336,9 @@ def display_task_list():
     # GUEST ONLY
     else:
         # Task dataframe
-        st.dataframe(task_list, use_container_width=True)
+        st.dataframe(task_list)
 
+        
     with st.sidebar:
     # Category Management
         st.subheader("Categories")
@@ -327,49 +348,20 @@ def display_task_list():
             st.write(f"{i}. {category}")
             i = i + 1
 
-    if role != "Guest":
-        st.subheader("Add Category")
-        with st.form("Add", clear_on_submit=True, border=False):
-            col1, col2 = st.columns(2)
-
-            with col1:
-                category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed" )
-            
-            with col2:
-                if st.form_submit_button("Add"):
-                    if category_entry:
-                        if category_entry in category_list:
-                            st.error(f"Category '{category_entry}' already exists")
+        with st.sidebar.form("Category", clear_on_submit=True, border=False):
+            with st.expander("Remove a Category"):
+                selected_category = st.selectbox(f"Remove Category", filtered_category_list, index=None, placeholder="Category to Remove", label_visibility="collapsed")
+                if st.form_submit_button("Remove"):
+                    if selected_category != 'Select a category':
+                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
+                        if response.status_code == 200:
+                            st.rerun()
+                            st.success(f"Category has been removed.")
                         else:
-                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
-                            if response.status_code == 200:
-                                st.rerun()
-                                st.success(f'Category "{category_entry}" added!')
-                            else:
-                                st.error("There was an error adding the category")
+                            st.error(f"Error: {response.text}")
                     else:
-                        st.error("Please enter a category name")
-        
+                        st.error("Please select a category.")
 
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-
-            selected_category = st.selectbox(f"", ["Select a category"] + filtered_category_list, label_visibility="collapsed")
-
-        with col2:
-            if st.button("Remove"):
-                if selected_category != 'Select a category':
-                    response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
-                    if response.status_code == 200:
-                        st.rerun()
-                        st.success(f"Category has been removed.")
-                    else:
-                        st.error(f"Error: {response.text}")
-                else:
-                    st.error("Please select a category.")
-   
     
 # Function to display team settings
 def display_team_settings():
@@ -489,21 +481,7 @@ def display_team_settings():
 def display_home():
 
     #Adjusting the 'Welcome to HoneyDue' to the center of the page. 
-    st.markdown(
-        """
-        <style>
-        .centered-title {
-            text-align: center;
-            font-size: 3em; /* Adjust font size as needed */
-            font-weight: bold;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    st.markdown('<div class="centered-title">Welcome to HoneyDue! </div>', unsafe_allow_html=True)
-   
-    st.logo("https://i.pinimg.com/originals/fe/be/ca/febeca2f63bd56c127069bac2fff9323.jpg")
+    display_company_logo()
     
     #Centered the buttons to the screen
     col1, col2, col3 = st.columns([.60,.50,1])
@@ -518,9 +496,8 @@ def display_home():
             st.session_state.page = "signup"
             st.rerun()
 
-# Main application
-def main():
-
+def display_company_logo():
+    
     #Each screen will have the HoneyDue sign on the top
     st.markdown(
         """
@@ -539,6 +516,11 @@ def main():
     with col2:
         st.image("https://i.pinimg.com/originals/fe/be/ca/febeca2f63bd56c127069bac2fff9323.jpg",width=200) 
     st.markdown('<div class="header-title">HoneyDue</div>', unsafe_allow_html=True)
+
+# Main application
+def main():
+
+    
     
     if "logged_in" not in st.session_state:
         st.session_state.logged_in = False
