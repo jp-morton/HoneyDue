@@ -125,6 +125,8 @@ def display_projects():
         st.session_state.clear()
         st.rerun()
 
+    st.sidebar.markdown("---")
+
     with st.sidebar:    
         # Fetch current projects
         st.subheader("Your Projects")
@@ -146,6 +148,8 @@ def display_tasks():
     if st.sidebar.button("Logout"):
         st.session_state.clear()
         st.rerun()
+
+    st.sidebar.markdown("---")
 
     if st.sidebar.button("Back"):
         del st.session_state.project_name
@@ -172,6 +176,8 @@ def display_task_list():
     if st.sidebar.button("Logout"):
         st.session_state.clear()
         st.rerun()
+    
+    st.sidebar.markdown("---")
         
     # Back button
     if st.sidebar.button("Back"):
@@ -347,6 +353,8 @@ def display_team_settings():
     if st.sidebar.button("Logout"):
         st.session_state.clear()
         st.rerun()
+
+    st.sidebar.markdown("---")
     # Return button
     if st.sidebar.button("Back"):
         del st.session_state["team_settings"]
