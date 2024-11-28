@@ -267,9 +267,8 @@ def display_task_list():
                                     st.error("There was an error adding the category")
                         else:
                             st.error("Please enter a category name")
-
         
-            # Get user role
+        # Get user role
         response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
         if response.status_code == 200:
             role = response.json()
@@ -286,9 +285,6 @@ def display_task_list():
             category_list = response.json()
             filtered_category_list = category_list.copy()
             filtered_category_list.remove("None")
-
-        # OWNER AND MEMBER ONLY
-        #if role != "Guest":
 
         # List of Assignees
         response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
@@ -319,7 +315,7 @@ def display_task_list():
         edited_df = st.data_editor(df_sorted_reset, num_rows="dynamic", column_config=column_config, use_container_width=True)
 
         # Update button
-        if st.button("Update Tasks"):
+        if st.button("Save"):
             if edited_df is not None and not df_sorted_reset.equals(edited_df):
                 if edited_df.isnull().values.any() or (edited_df == "").values.any():
                     st.error("All fields must be filled before updating")
@@ -338,10 +334,29 @@ def display_task_list():
                         st.error(f"Failed to update data. Status code: {update_response.status_code}")
             else:
                 st.warning("No changes were made to the tasks")
+    
+        i = 1
+        for category in filtered_category_list:
+            st.sidebar.write(f"{i}. {category}")
+            i = i + 1
+
+        with st.sidebar.form("Category", clear_on_submit=True, border=False):
+            with st.expander("Remove a Category"):
+                selected_category = st.selectbox(f"Remove Category", filtered_category_list, index=None, placeholder="Category to Remove", label_visibility="collapsed")
+                if st.form_submit_button("Remove"):
+                    if selected_category != 'Select a category':
+                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
+                        if response.status_code == 200:
+                            st.rerun()
+                            st.success(f"Category has been removed.")
+                        else:
+                            st.error(f"Error: {response.text}")
+                    else:
+                        st.error("Please select a category.")
     elif role == "Guest" or len(task_list) == 0:
         st.subheader("\n\nThere are no tasks to display.")
         
-
+    
     
 # Function to display team settings
 def display_team_settings():
