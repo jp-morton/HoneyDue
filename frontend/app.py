@@ -242,47 +242,47 @@ def display_task_list():
                             st.error(f"Error: {response.text}")
 
    
-    if role != "Guest":
-        
-        with st.sidebar.form("Add", clear_on_submit=True, border=False):
+        if role != "Guest":
             
-                category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed" )
+            with st.sidebar.form("Add", clear_on_submit=True, border=False):
+                
+                    category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed" )
 
-                if st.form_submit_button("Add"):
-                    if category_entry:
-                        if category_entry in category_list:
-                            st.error(f"Category '{category_entry}' already exists")
-                        else:
-                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
-                            if response.status_code == 200:
-                                st.rerun()
-                                st.success(f'Category "{category_entry}" added!')
+                    if st.form_submit_button("Add"):
+                        if category_entry:
+                            if category_entry in category_list:
+                                st.error(f"Category '{category_entry}' already exists")
                             else:
-                                st.error("There was an error adding the category")
-                    else:
-                        st.error("Please enter a category name")
+                                response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
+                                if response.status_code == 200:
+                                    st.rerun()
+                                    st.success(f'Category "{category_entry}" added!')
+                                else:
+                                    st.error("There was an error adding the category")
+                        else:
+                            st.error("Please enter a category name")
 
-    # st.subheader("Tasks")
-
-    # Get user role
-    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
-    if response.status_code == 200:
-        role = response.json()
-
-    # Get task list
-    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", params={"project_name": st.session_state.project_name})
-    if response.status_code == 200:
-        task_list = response.json()
         
-    # Get category list
-    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
-    if response.status_code == 200:
-        category_list = response.json()
-        filtered_category_list = category_list.copy()
-        filtered_category_list.remove("None")
+            # Get user role
+        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
+        if response.status_code == 200:
+            role = response.json()
 
-    # OWNER AND MEMBER ONLY
-    if role != "Guest":
+        # Get task list
+        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", params={"project_name": st.session_state.project_name})
+        if response.status_code == 200:
+            task_list = response.json()
+
+    if len(task_list) != 0 and role != "Guest":        
+        # Get category list
+        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
+        if response.status_code == 200:
+            category_list = response.json()
+            filtered_category_list = category_list.copy()
+            filtered_category_list.remove("None")
+
+        # OWNER AND MEMBER ONLY
+        #if role != "Guest":
 
         # List of Assignees
         response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
@@ -332,35 +332,9 @@ def display_task_list():
                         st.error(f"Failed to update data. Status code: {update_response.status_code}")
             else:
                 st.warning("No changes were made to the tasks")
-
-    # GUEST ONLY
-    else:
-        # Task dataframe
-        st.dataframe(task_list)
-
+    elif role == "Guest" or len(task_list) == 0:
+        st.subheader("\n\nThere are no tasks to display.")
         
-    with st.sidebar:
-    # Category Management
-        st.subheader("Categories")
-
-        i = 1
-        for category in filtered_category_list:
-            st.write(f"{i}. {category}")
-            i = i + 1
-
-        with st.sidebar.form("Category", clear_on_submit=True, border=False):
-            with st.expander("Remove a Category"):
-                selected_category = st.selectbox(f"Remove Category", filtered_category_list, index=None, placeholder="Category to Remove", label_visibility="collapsed")
-                if st.form_submit_button("Remove"):
-                    if selected_category != 'Select a category':
-                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
-                        if response.status_code == 200:
-                            st.rerun()
-                            st.success(f"Category has been removed.")
-                        else:
-                            st.error(f"Error: {response.text}")
-                    else:
-                        st.error("Please select a category.")
 
     
 # Function to display team settings
@@ -533,7 +507,7 @@ def main():
         if "team_settings" in st.session_state:
             display_team_settings()
         elif "task_list" in st.session_state:
-            display_task_list()
+                display_task_list()
         else:
             display_tasks()
     elif st.session_state.logged_in:
