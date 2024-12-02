@@ -474,8 +474,24 @@ def display_team_settings():
 def display_home():
 
     #Adjusting the 'Welcome to HoneyDue' to the center of the page. 
+
     display_company_logo()
     
+
+    st.markdown(
+        """
+        <style>
+        .centered-title {
+            text-align: center;
+            font-size: 3em; /* Adjust font size as needed */
+            font-weight: bold;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown('<div class="centered-title">Welcome to HoneyDue! </div>', unsafe_allow_html=True)
+
     #Centered the buttons to the screen
     col1, col2, col3 = st.columns([.60,.50,1])
     
@@ -489,8 +505,16 @@ def display_home():
             st.session_state.page = "signup"
             st.rerun()
 
+
 def display_company_logo():
     
+
+# Main application
+def main():
+
+    #Displaying the background image
+
+
     #Each screen will have the HoneyDue sign on the top
     st.markdown(
         """
