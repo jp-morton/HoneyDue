@@ -110,3 +110,39 @@
 .st-key-Login button:focus p {
     color: black;
 }
+
+.st-key-Projects1 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects2 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects3 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects4 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects5 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects6 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}

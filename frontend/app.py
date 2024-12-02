@@ -132,7 +132,7 @@ def display_projects():
             project_list = response.json()
             i = 1
             for project in project_list:
-                if st.button(f"{i}. {project}"):
+                if st.button(f"{i}. {project}", key= f"Projects{i}"):
                     st.session_state.project_name = project
                     st.rerun()
                 i = i + 1
@@ -248,7 +248,7 @@ def display_task_list():
             
             with st.sidebar.form("Add", clear_on_submit=True, border=False):
                 
-                    category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed" )
+                    category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed")
 
                     if st.form_submit_button("Add"):
                         if category_entry:
