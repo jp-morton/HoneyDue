@@ -1,0 +1,112 @@
+/* Back Button */
+.st-key-Back button:hover {
+    background-color: gold;
+    border: none;
+}
+
+.st-key-Back button:hover p {
+    color: black;
+}
+
+.st-key-Back button:focus {
+    color: gold;
+}
+
+.st-key-Back button:focus p {
+    color: black;
+}
+
+/* Logout Button */
+.st-key-Logout button {
+    background-color: gold;
+    color: black;
+}
+
+.st-key-Logout button:hover {
+    background-color: red;
+    border: none;
+}
+
+.st-key-Logout button:hover p {
+    color: black;
+}
+
+.st-key-Logout button:focus {
+    color: red;
+}
+
+.st-key-Logout button:focus p {
+    color: black;
+}
+
+/* Signup Button */
+.st-key-SignUp button:hover {
+    background-color: gold;
+    border: none;
+}
+
+.st-key-SignUp button:hover p {
+    color: black;
+}
+
+.st-key-SignUp button:focus {
+    color: gold;
+}
+
+.st-key-SignUp button:focus p {
+    color: black;
+}
+
+/* Team Settings Button */
+.st-key-TeamSet button:hover {
+    background-color: gold;
+    border: none;
+}
+
+.st-key-TeamSet button:hover p {
+    color: black;
+}
+
+.st-key-TeamSet button:focus {
+    color: gold;
+}
+
+.st-key-TeamSet button:focus p {
+    color: black;
+}
+
+/* Task Management Button */
+.st-key-TaskMan button:hover {
+    background-color: gold;
+    border: none;
+}
+
+.st-key-TaskMan button:hover p {
+    color: black;
+}
+
+.st-key-TaskMan button:focus {
+    color: gold;
+}
+
+.st-key-TaskMan button:focus p {
+    color: black;
+}
+
+/* Login Button */
+.st-key-Login button:hover {
+    background-color: gold;
+    border: none;
+}
+
+.st-key-Login button:hover p {
+    color: black;
+}
+
+.st-key-Login button:focus {
+    color: gold;
+}
+
+.st-key-Login button:focus p {
+    color: black;
+}

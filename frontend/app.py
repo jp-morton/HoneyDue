@@ -3,9 +3,17 @@ import streamlit.components.v1 as components
 from streamlit_calendar import calendar
 import pandas as pd
 import requests
-
+import pathlib
 
 API_URL = "http://backend:8000"
+
+# Function to load CSS from folder
+def load_css(file_path):
+    with open(file_path) as f:
+        st.html(f"<style>{f.read()}</style>")
+
+css_path = pathlib.Path("styles.css")
+load_css(css_path)
 
 st.logo("https://i.pinimg.com/originals/fe/be/ca/febeca2f63bd56c127069bac2fff9323.jpg", size="large")
 # Helper function to handle user login
@@ -50,7 +58,7 @@ def display_login():
                 st.error("Invalid username or password")
     
     # Add "Back" button to return to home page
-    if st.sidebar.button("Back"):
+    if st.sidebar.button("Back", key = 'Back'):
         st.session_state.page = "home"
         st.rerun()
 
@@ -71,18 +79,17 @@ def display_signup():
                 if signup_attempt.ok:
                     st.success("Account created successfully! Please log in.")
                 else:
-                    error_detail = signup_attempt.json().get("detail", "Error: ")
-                    st.error(error_detail)
+                    st.error("Account with this username already exists.")
             else:
-                st.error("Password mismatch")
+                st.error("Passwords mismatch")
     
     # Add "Back" button to return to home page
-    if st.sidebar.button("Back"):
+    if st.sidebar.button("Back", key = 'Back'):
         st.session_state.page = "home"
         st.rerun()
    
     # Add "Back" button to return to previous page
-    if st.sidebar.button("Login"):
+    if st.sidebar.button("Login", key = 'Login'):
         st.session_state.page = "login"
         st.rerun()
 
@@ -109,19 +116,8 @@ def display_projects():
                         st.error("Project with this name already exists or invalid input.")
                 else:
                     st.error("Please enter a project name.")
-
-    components.html(
-        """
-        <script>
-        const elements = window.parent.document.querySelectorAll('.stButton > button')
-        elements[0].style.backgroundColor = 'gold'
-        </script>
-            """, 
-            height=0,
-            width=0
-    )
    
-    if st.sidebar.button("Logout"):
+    if st.sidebar.button("Logout", key = 'Logout'):
         st.session_state.clear()
         st.rerun()
 
@@ -145,21 +141,21 @@ def display_projects():
 def display_tasks():
     st.subheader(f"{st.session_state.project_name} Homepage")
 
-    if st.sidebar.button("Logout"):
+    if st.sidebar.button("Logout", key= 'Logout'):
         st.session_state.clear()
         st.rerun()
 
     st.sidebar.markdown("---")
 
-    if st.sidebar.button("Back"):
+    if st.sidebar.button("Back", key= 'Back'):
         del st.session_state.project_name
         st.rerun()
 
-    if st.sidebar.button("Team Settings"):
+    if st.sidebar.button("Team Settings", key= 'TeamSet'):
             st.session_state["team_settings"] = True
             st.rerun()
 
-    if st.sidebar.button("Manage Tasks"):
+    if st.sidebar.button("Manage Tasks", key= 'TaskMan'):
         st.session_state["task_list"] = True
         st.rerun()
 
@@ -173,14 +169,14 @@ def display_tasks():
 def display_task_list():
 
     # Log out button
-    if st.sidebar.button("Logout"):
+    if st.sidebar.button("Logout", key= 'Logout'):
         st.session_state.clear()
         st.rerun()
     
     st.sidebar.markdown("---")
         
     # Back button
-    if st.sidebar.button("Back"):
+    if st.sidebar.button("Back", key= 'Back'):
         del st.session_state["task_list"]
         st.rerun()
     
@@ -329,9 +325,9 @@ def display_task_list():
                     update_response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task_updates", json=payload)
                     if update_response.status_code == 200:
                         st.rerun()
-                        st.success("Data updated successfully")
+                        st.success("Data update saved successfully")
                     else:
-                        st.error(f"Failed to update data. Status code: {update_response.status_code}")
+                        st.error(f"Failed to save data. Status code: {update_response.status_code}")
             else:
                 st.warning("No changes were made to the tasks")
     
@@ -350,7 +346,7 @@ def display_task_list():
                             st.rerun()
                             st.success(f"Category has been removed.")
                         else:
-                            st.error(f"Error: {response.text}")
+                            st.error("Error occurred while removing category.")
                     else:
                         st.error("Please select a category.")
     elif role == "Guest" or len(task_list) == 0:
@@ -365,13 +361,13 @@ def display_team_settings():
     with col1:
         st.title(st.session_state.project_name + " Team Settings")
     
-    if st.sidebar.button("Logout"):
+    if st.sidebar.button("Logout", key= 'Logout'):
         st.session_state.clear()
         st.rerun()
 
     st.sidebar.markdown("---")
     # Return button
-    if st.sidebar.button("Back"):
+    if st.sidebar.button("Back", key= 'Back'):
         del st.session_state["team_settings"]
         st.rerun()
 
@@ -484,12 +480,12 @@ def display_home():
     col1, col2, col3 = st.columns([.60,.50,1])
     
     with col2:
-        if st.button("Login"):
+        if st.button("Login", key= 'Login'):
             st.session_state.page = "login"
             st.rerun()
 
     with col3:
-        if st.button("Sign Up"):
+        if st.button("Sign Up", key= 'SignUp'):
             st.session_state.page = "signup"
             st.rerun()
 
