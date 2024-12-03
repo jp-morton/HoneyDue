@@ -138,9 +138,6 @@ def display_projects():
                     st.rerun()
                 i = i + 1
 
-from datetime import datetime
-from streamlit_calendar import calendar
-import requests
 
 def display_calendar():
     # Initialize state to avoid UnboundLocalError
