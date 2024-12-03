@@ -4,6 +4,7 @@ from streamlit_calendar import calendar
 import pandas as pd
 import requests
 import pathlib
+from datetime import datetime
 
 API_URL = "http://backend:8000"
 
@@ -137,6 +138,141 @@ def display_projects():
                     st.rerun()
                 i = i + 1
 
+from datetime import datetime
+from streamlit_calendar import calendar
+import requests
+
+def display_calendar():
+    # Initialize state to avoid UnboundLocalError
+    state = {}
+
+    # Fetch tasks from the backend
+    response = requests.get(
+        f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task",
+        params={"project_name": st.session_state.project_name},
+    )
+
+    if response.status_code == 200:
+        tasks = response.json()
+        events = []
+
+        for task in tasks:
+            if not task.get("deadline"):
+                st.error(f"Task '{task['name']}' is missing a deadline.")
+                return
+
+            # Convert deadline to ISO 8601 format if not already
+            try:
+                start_date = datetime.strptime(task["deadline"], "%Y-%m-%d").isoformat()
+            except ValueError:
+                st.error(f"Task '{task['name']}' has an invalid deadline format.")
+                return
+
+            event = {
+                "title": task["name"],
+                "start": start_date,
+                "end": start_date,
+                "color": "#3D9DF3",
+            }
+            events.append(event)
+    else:
+        st.error("Could not fetch tasks.")
+        return
+
+    # Set up calendar options
+    calendar_options = {
+        "initialView": "dayGridMonth",
+        "editable": True,
+        "navLinks": True,
+        "displayEventTime": False,  # Disables time display
+        "selectable": True,
+    }
+
+    # Render the calendar
+    try:
+        state = calendar(events=events, options=calendar_options, key="tasks_calendar")
+    except Exception as e:
+        st.error(f"Calendar rendering failed: {e}")
+
+    # Ensure state is defined before accessing it
+    if state:
+        if state.get("eventClick"):
+            st.write("Selected Event Details:", state["eventClick"])
+
+        if state.get("eventsSet"):
+            st.session_state["events"] = state["eventsSet"]
+
+        # Debugging output for state
+        st.write("Calendar State:", state)
+
+# def display_calendar():
+#     # Fetch tasks from the backend
+#     response = requests.get(
+#         f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task",
+#         params={"project_name": st.session_state.project_name},
+#     )
+
+#     if response.status_code == 200:
+#         tasks = response.json()
+#         # Format tasks for the calendar
+#         events = []
+#         for task in tasks:
+
+#             # color_map = {"High": "#FF6C6C", "Medium": "#FFBD45", "Low": "#3DD56D"}
+#             # event = {
+#             #     "title": task["name"],
+#             #     "start": task["deadline"],
+#             #     "end": task["deadline"],
+#             #     "color": color_map.get(task["priority"], "#3D9DF3"),
+#             # }
+
+#             task["deadline"] = datetime.strptime(task["deadline"], "%Y-%m-%d").isoformat()
+
+#             event = {
+#                 "title": task["name"],
+#                 "start": task["deadline"],
+#                 "end": task["deadline"],   # Use end dates if available
+#                 "color": "#3D9DF3",        # Optional, set based on task priority/status
+#             }
+#             events.append(event)
+#     else:
+#         st.error("Could not fetch tasks.")
+#         return
+    
+
+#     # mode = st.selectbox(
+#     # "Calendar Mode:",
+#     # ["daygrid", "timegrid", "list", "timeline"],
+#     # )
+
+#     # Set up calendar options
+#     calendar_options = {
+#         "initialView": "daygrid",
+#         "editable": "true",
+#         "navLinks": "true",
+#         "selectable": "true",
+#     }
+
+#     # calendar_options["initialView"] = mode
+
+#     # Render the calendar
+#     # state = calendar(events=events, options=calendar_options, key="tasks_calendar")
+
+#     # Handle selected event (if any)
+#     if state.get("eventClick"):
+#         st.write("Selected Event Details:", state["eventClick"])
+
+#     # Handle newly added or updated events
+#     if state.get("eventsSet"):
+#         st.session_state["events"] = state["eventsSet"]
+
+#     # Render the calendar
+#     try:
+#         state = calendar(events=events, options=calendar_options, key="tasks_calendar")
+#         st.write(state)
+#     except Exception as e:
+#         st.error(f"Calendar rendering failed: {e}")
+
 # Function to display tasks and add new tasks
 def display_tasks():
     st.subheader(f"{st.session_state.project_name} Homepage")
@@ -164,7 +300,9 @@ def display_tasks():
         role = response.json()
 
     # CALENDAR PLACEHOLDER
-    calendar()
+    display_calendar()
+
+
 
 def display_task_list():
 
