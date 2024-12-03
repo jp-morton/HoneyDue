@@ -303,7 +303,7 @@ def display_task_list():
         }
 
         sort_by = st.selectbox("Sort Tasks", placeholder="Sort Tasks", options=df.columns.tolist(), index=0, label_visibility="collapsed")
-        sort_order = st.radio("Task order", options=["Ascending", "Descending"], index=0)
+        sort_order = st.radio("Task order", options=["Ascending", "Descending"], index=0, key='Radio')
         ascending = True if sort_order == "Ascending" else False
         df_sorted = df.sort_values(by=sort_by, ascending=ascending)
         df_sorted_reset = df_sorted.reset_index(drop=True)
