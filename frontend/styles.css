@@ -339,12 +339,61 @@ body {
     border-bottom-color: rgb(251, 215, 0);
     
   }
-  
-.st-e9 {
-    color: rgb(0, 0, 0);
+
+.st-eb {
+    background-color: rgb(251, 215, 0);
   }
+  
+.st-ef {
+    background-color: rgb(0, 0, 0);
+}
   
 .st-cg {
     border-bottom-color: rgb(251, 215, 0);
+  }
+  
+
+.st-emotion-cache-15hul6a:hover {
+    border-color: rgb(251, 215, 0);
+    color: rgb(0, 0, 0);
+    background-color: rgb(251, 215, 0);
+    
+  }
+  
+
+.fc .fc-button-primary:hover {
+    background-color: #ffd700;
+    border-color: var(--fc-button-hover-border-color);
+    color: #0e1117;
+    border-color: var(--fc-button-hover-border-color);
+    color: rgb(14, 17, 23);
+  }
+  
+  .fc .fc-button-primary:disabled {
+
+    background-color: rgb(251,215, 0);
+    border-color: var(--fc-button-border-color);
+    color: #000;
+    border-color: var(--fc-button-border-color);
+  }
+  
+  .fc .fc-button-primary {
+    background-color: rgb(0, 0, 0);
+    border-color: rgb(251,215, 0);
+    color: rgb(251, 215, 0);
+    border-color: var(--fc-button-border-color);
+    background-color: rgb(0, 0, 0);
+    color: rgb(251, 215, 0);
+  }
+  
+
+
+.fc .fc-button-primary:disabled {
+    
+    background-color: #ffd700;
+    border-color: var(--fc-button-border-color);
+    color: #0e1117;
+    border-color: var(--fc-button-border-color);
+    color: rgb(14, 17, 23);
   }
   
