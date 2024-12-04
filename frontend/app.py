@@ -153,6 +153,16 @@ def display_calendar():
         tasks = response.json()
         events = []
 
+
+        priority_color_map  = {
+            1: "#FF0000",  # Red for priority 1 (highest)
+            2: "#FFA500",  # Orange for priority 2
+            3: "#FFFF00",  # Yellow for priority 3
+            4: "#90EE90",  # Light Green for priority 4
+            5: "#008000",  # Green for priority 5 (lowest)
+        }
+
+
         for task in tasks:
             if not task.get("deadline"):
                 st.error(f"Task '{task['name']}' is missing a deadline.")
@@ -165,11 +175,15 @@ def display_calendar():
                 st.error(f"Task '{task['name']}' has an invalid deadline format.")
                 return
 
+            # Fetch the priority of the task and assign the corresponding color
+            priority = int(task.get("priority", 5))  # Default to priority 5 if not specified
+            color = priority_color_map.get(priority, "#3D9DF3")  # Default to blue if priority is invalid
+
             event = {
                 "title": task["name"],
                 "start": start_date,
                 "end": start_date,
-                "color": "#3D9DF3",
+                "color": color,
             }
             events.append(event)
     else:
@@ -270,7 +284,31 @@ def display_calendar():
 #     except Exception as e:
 #         st.error(f"Calendar rendering failed: {e}")
 
-# Function to display tasks and add new tasks
+
+#Function for displaying color coding tasks
+def display_priority_color_code():
+    # Define colors for different priorities
+    priority_color_map = {
+        1: "#FF0000",  # Red for priority 1 (highest)
+        2: "#FFA500",  # Orange for priority 2
+        3: "#FFFF00",  # Yellow for priority 3
+        4: "#90EE90",  # Light Green for priority 4
+        5: "#008000",  # Green for priority 5 (lowest)
+    }
+
+    st.sidebar.subheader("Priority Color Code")
+    for priority, color in priority_color_map.items():
+        st.sidebar.markdown(
+            f"""
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                <div style="width: 15px; height: 15px; background-color: {color}; border-radius: 3px; margin-right: 8px;"></div>
+                <span>Priority {priority}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
 def display_tasks():
     st.subheader(f"{st.session_state.project_name} Homepage")
 
@@ -296,10 +334,14 @@ def display_tasks():
     if response.status_code == 200:
         role = response.json()
 
+    st.sidebar.markdown("---")
+    
+    display_priority_color_code()
+
     # CALENDAR PLACEHOLDER
     display_calendar()
 
-
+# Function to display tasks and add new tasks
 
 def display_task_list():
 
