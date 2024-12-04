@@ -1,32 +1,52 @@
 import h5py
 
 class Account_Utilities:
+    """
+    A utility class for managing accounts and associated project data stored in an HDF5 file.
+
+    Methods:
+        username_exists(username): Check if a username exists in the database.
+        password_exists(password): Check if a password exists in the database.
+        account_exists(username, password): Check if an account with the given credentials exists.
+        add_user(username, password): Add a new user to the database.
+        user_has_project(username, project_name): Check if a user has a specific project.
+        add_project(project_name, username): Add a project to a user's project list.
+        remove_project(project_name, username): Remove a project from a user's project list.
+        get_project_list(username): Retrieve a list of projects for a user.
+        reset(): Reset the database to default values (used for testing).
+    """
 
     #################################
     ### SIGN UP / LOGIN FUNCTIONS ###
     #################################
 
-    # Name: username_exists
-    # Description: Searches the account data to see if a username has been used
-    # Input: 
-    #   username: The username being searched for
-    # Output:
-    #   True if the username is found
-    #   False if the username is not found        
+    @staticmethod
     def username_exists(username: str):
+        """
+        Check if a username exists in the database.
+
+        Args:
+            username (str): The username to search for.
+
+        Returns:
+            bool: True if the username exists, False otherwise.
+        """
         with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             if username in account_data:
                 return True
             return False
 
-    # Name: password_exists
-    # Description: Searches the account data to see if a password has been used
-    # Input: 
-    #   password: The password being searched for
-    # Output:
-    #   True if the password is found
-    #   False if the password is not found
+    @staticmethod
     def password_exists(password: str):
+        """
+        Check if a password exists in the database.
+
+        Args:
+            password (str): The password to search for.
+
+        Returns:
+            bool: True if the password exists, False otherwise.
+        """
         with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 user_group = account_data[user]
@@ -34,15 +54,18 @@ class Account_Utilities:
                     return True
             return False
 
-    # Name: account_exists
-    # Description: Searches the account data to see if an account exists 
-    # Input: 
-    #   username: The username of the account being searched for
-    #   password: The password of the account being searched for
-    # Output:
-    #   True if the account is found
-    #   False if the account is not found
+    @staticmethod
     def account_exists(username: str, password: str):
+        """
+        Check if an account exists with the given username and password.
+
+        Args:
+            username (str): The username of the account.
+            password (str): The password of the account.
+
+        Returns:
+            bool: True if the account exists, False otherwise.
+        """
         with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             try:
                 user_group = account_data[username]
@@ -52,12 +75,18 @@ class Account_Utilities:
             except:
                 return False
 
-    # Name: add_user
-    # Description: Add a new user to the account data. Will raise an error if the username or password already exists
-    # Input: 
-    #   username: The username of the user being added
-    #   password: The password of the user being added 
+    @staticmethod
     def add_user(username: str, password: str):
+        """
+        Add a new user to the database.
+
+        Args:
+            username (str): The username of the new user.
+            password (str): The password of the new user.
+
+        Raises:
+            ValueError: If the username or password already exists.
+        """
         with h5py.File('/app/database/account_data.hdf5', 'a') as account_data:
             if Account_Utilities.username_exists(username):  
                 raise ValueError("Username already exists.")
@@ -72,28 +101,36 @@ class Account_Utilities:
     ### PROJECT FUNCTIONS ###
     #########################
 
-    # Name: user_has_project
-    # Description: Check to see if a user has a project with a particular name 
-    # Input: 
-    #   username: The username whose projects are being checked
-    #   project_name: The name of the project being searched for
-    # Output: 
-    #   True if the user does have the project
-    #   False if the user does not have the project 
+    @staticmethod
     def user_has_project(username: str, project_name: str):
+        """
+        Check if a user has a specific project.
+
+        Args:
+            username (str): The username to check.
+            project_name (str): The project name to look for.
+
+        Returns:
+            bool: True if the user has the project, False otherwise.
+        """
         project_list = Account_Utilities.get_project_list(username)
         if project_name in project_list:
             return True
         else:
             return False
 
-    # Name: add_project
-    # Description: Add a new project to a user's account data
-    # Input: 
-    #   project_name: The name of the project being added
-    #   username: The username of the user adding the project
+    @staticmethod
     def add_project(project_name: str, username: str):
+        """
+        Add a new project to a user's project list.
 
+        Args:
+            project_name (str): The name of the project.
+            username (str): The username of the user.
+
+        Raises:
+            ValueError: If the project cannot be added.
+        """
         with h5py.File('/app/database/account_data.hdf5', 'a') as account_data:
             try:
                 user_group = account_data[username]
@@ -103,13 +140,18 @@ class Account_Utilities:
             except:
                 raise ValueError(f"There was an error adding Project {project_name} to {username}")
             
-    # Name: remove_project
-    # Description: Removes a project name from the user's project list
-    # Input: 
-    #   project_name: The name of the project being removed
-    #   username: The name of the user who is having the project removed 
+    @staticmethod
     def remove_project(project_name: str, username: str):
+        """
+        Remove a project from a user's project list.
 
+        Args:
+            project_name (str): The name of the project to remove.
+            username (str): The username of the user.
+
+        Raises:
+            ValueError: If the user or project does not exist.
+        """
         with h5py.File('/app/database/account_data.hdf5', 'a') as account_data:
             try:
                 user_group = account_data[username]
@@ -126,13 +168,17 @@ class Account_Utilities:
             except:
                 raise ValueError(f"User {username} or project dataset does not exist")
 
-    # Name: get_project_list
-    # Description: Retrieve the list of project names for a particular user
-    # Input: 
-    #   username: The username of the User whose projects are being retrieved
-    # Output: 
-    #   The list of the user's projects
+    @staticmethod
     def get_project_list(username: str):
+        """
+        Retrieve the list of projects for a user.
+
+        Args:
+            username (str): The username of the user.
+
+        Returns:
+            list: A list of project names.
+        """
         with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 if user == username:
@@ -141,16 +187,17 @@ class Account_Utilities:
                     project_list = [project.decode('utf-8') for project in project_dataset]
                     return project_list
 
-
-
-
-
-
     #################################################
     # THE FOLLOWING FUNCTION IS TO RESET THE DATABASE
     #################################################
 
+    @staticmethod
     def reset():
+        """
+        Reset the database to default values for testing purposes.
+
+        Creates default users and assigns one project to each user.
+        """
         with h5py.File('/app/database/account_data.hdf5', 'w') as account_data:
             i = 1
             while i <= 4:

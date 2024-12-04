@@ -7,36 +7,55 @@ from libraries.project import Project
 from utilities.account_utilities import Account_Utilities
 
 class Project_Utilities:
+    """
+    Utility class for managing project-related operations.
+    """
 
-    # Name: add_project
-    # Description: Creates a dataset for the Project object
-    # Input:
-    #   project: The project object being added to the data
+    @staticmethod
     def add_project(project: Project):
+        """
+        Adds a project to the database.
+
+        Args:
+            project (Project): The project object to be added.
+
+        Raises:
+            ValueError: If a project with the same name already exists.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             serialized_project = pickle.dumps(project)
             project_data.create_dataset(project.name, data=np.void(serialized_project))
 
-    # Name: project_exists
-    # Description: Checks to see if a project exists
-    # Input:
-    #   project_name: The project name being searched for
-    # Output:
-    #   True if the project name already exists
-    #   False if the project name does not already exist
+    @staticmethod
     def project_exists(project_name: str):
+        """
+        Checks if a project exists in the database.
+
+        Args:
+            project_name (str): The name of the project to check.
+
+        Returns:
+            bool: True if the project exists, False otherwise.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             for project in project_data:
                 if project == project_name:
                     return True
             return False
 
-    # Name: add_collaborator
-    # Description: adds a collaborator to a particular project
-    # Input: 
-    #   username: The username being added to the project member list
-    #   project_name: The name of the project that the user is being added to 
+    @staticmethod
     def add_collaborator(username: str, role: str, project_name: str):
+        """
+        Adds a collaborator to a project.
+
+        Args:
+            username (str): The username of the collaborator.
+            role (str): The role of the collaborator (e.g., 'OWNER', 'MEMBER', 'GUEST').
+            project_name (str): The name of the project to which the collaborator is added.
+
+        Raises:
+            ValueError: If the project does not exist or if loading the project fails.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
@@ -46,31 +65,40 @@ class Project_Utilities:
             except:
                 raise ValueError(f"Error loading project '{project_name}'")
             project_obj.add_collaborator(username, role)
-            # project_obj.members.append(username)
             serialized_project = pickle.dumps(project_obj)
             del project_data[project_name]
             project_data.create_dataset(project_name, data=np.void(serialized_project))
 
             Account_Utilities.add_project(project_name, username)
 
-    # Name: get_collaborators
-    # Description: Gets the list of collaborator names for a particular project
-    # Input: 
-    #   project_name: The name of the project whose collaborators are being retrieved
-    # Output: 
-    #   The list of collaborators
+    @staticmethod
     def get_collaborators(project_name: str):
+        """
+        Retrieves the list of collaborators for a project.
+
+        Args:
+            project_name (str): The name of the project.
+
+        Returns:
+            list: A list of collaborators in the project.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
             return project_obj.collaborators
 
-    # Name: add_task
-    # Description: Adds a task to a particular project
-    # Input: 
-    #   task: The Task object being added to the project 
-    #   project_name: The name of the project that the task is being added to 
+    @staticmethod
     def add_task(task: Task, project_name: str):
+        """
+        Adds a task to a particular project.
+
+        Args:
+            task (Task): The Task object being added to the project.
+            project_name (str): The name of the project that the task is being added to.
+
+        Raises:
+            ValueError: If the project is not found or there is an error loading the project.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
@@ -86,22 +114,37 @@ class Project_Utilities:
             del project_data[project_name]
             project_data.create_dataset(project_name, data=np.void(serialized_project))
 
-    # Name: get_task_list
-    # Description: Retrieves the list of tasks for a particular project
-    # Input
-    #   project_name: The name of the project whose task list is being retrieved
+    @staticmethod
     def get_task_list(project_name: str):
+        """
+        Retrieves the list of tasks for a particular project.
+
+        Args:
+            project_name (str): The name of the project whose task list is being retrieved.
+
+        Returns:
+            list: A list of tasks associated with the project.
+
+        Raises:
+            KeyError: If the project does not exist in the database.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
             return project_obj.tasks
 
-    # Name: add_category
-    # Description: Adds a category to a particular project
-    # Input: 
-    #   task: The name of the category being added to the project 
-    #   project_name: The name of the project that the category is being added to 
+    @staticmethod
     def add_category(category_name: str, project_name: str):
+        """
+        Adds a category to a particular project.
+
+        Args:
+            category_name (str): The name of the category being added to the project.
+            project_name (str): The name of the project that the category is being added to.
+
+        Raises:
+            ValueError: If the project is not found or there is an error loading the project.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
@@ -117,37 +160,55 @@ class Project_Utilities:
             del project_data[project_name]
             project_data.create_dataset(project_name, data=np.void(serialized_project))
 
-    # Name: get_category_list
-    # Description: Retrieves the list of categories for a particular project
-    # Input
-    #   project_name: The name of the project whose category list is being retrieved
+    @staticmethod
     def get_category_list(project_name: str):
+        """
+        Retrieves the list of categories for a particular project.
+
+        Args:
+            project_name (str): The name of the project whose category list is being retrieved.
+
+        Returns:
+            list: A list of categories associated with the project.
+
+        Raises:
+            KeyError: If the project does not exist in the database.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
             serialized_project = project_data[project_name][()]
             project_obj = pickle.loads(serialized_project)
             return project_obj.categories
 
-    # Name: category_exists
-    # Description: Checks to see if a category exists
-    # Input:
-    #   category_name: The category name being searched for
-    #   project_name: The project being searched in
-    # Output:
-    #   True if the category already exists
-    #   False if the category does not already exist
+    @staticmethod
     def category_exists(category_name: str, project_name: str):
+        """
+        Checks to see if a category exists in a project.
+
+        Args:
+            category_name (str): The name of the category being searched for.
+            project_name (str): The project in which to search for the category.
+
+        Returns:
+            bool: True if the category exists, False if it does not.
+        """
         category_list = Project_Utilities.get_category_list(project_name)
         for category in category_list:
             if category_name == category:
                 return True
         return False
     
-    # Name: update_task_list
-    # Description: Updates a project's task list 
-    # Input: 
-    #   project_name: The name of the project whose tasks are being updated
-    #   task_list: A list of dictionaries, each of which contain the contents of a task object in the project
+    @staticmethod
     def update_task_list(project_name: str, task_list: list[dict]):
+        """
+        Updates the task list for a given project.
+
+        Args:
+            project_name (str): The name of the project whose task list is being updated.
+            task_list (list[dict]): A list of dictionaries, each containing the contents of a task object.
+
+        Raises:
+            ValueError: If the project is not found or there is an error loading the project.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
@@ -175,12 +236,18 @@ class Project_Utilities:
             del project_data[project_name]
             project_data.create_dataset(project_name, data=np.void(serialized_project))
 
-    # Name: remove_category
-    # Description: Deletes a category from a project 
-    # Input: 
-    #   project_name: The name of the project whose category is being deleted
-    #   category_name: The name of the category being deleted
+    @staticmethod
     def remove_category(project_name: str, category_name: str):
+        """
+        Deletes a category from a project.
+
+        Args:
+            project_name (str): The name of the project whose category is being deleted.
+            category_name (str): The name of the category being deleted.
+
+        Raises:
+            ValueError: If the project is not found or there is an error loading the project.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
@@ -201,13 +268,21 @@ class Project_Utilities:
             del project_data[project_name]
             project_data.create_dataset(project_name, data=np.void(serialized_project))
 
-    # Name: get_user_role
-    # Description: Returns a user's role in a particular project
-    # Input
-    #   project_name: the name of the project being searched
-    #   username: The username of the user whose role is being retrieved
-    # Output: The role (OWNER, MEMBER, GUEST) of the user for the specified project
+    @staticmethod
     def get_user_role(project_name: str, username: str):
+        """
+        Returns a user's role in a particular project.
+
+        Args:
+            project_name (str): The name of the project.
+            username (str): The username of the user whose role is being retrieved.
+
+        Returns:
+            str: The role (OWNER, MEMBER, GUEST) of the user for the specified project.
+
+        Raises:
+            ValueError: If the user is not found in the project.
+        """
         if Account_Utilities.user_has_project(username, project_name):
             with h5py.File('/app/database/project_data.hdf5', 'r') as project_data:
                 serialized_project = project_data[project_name][()]
@@ -216,13 +291,19 @@ class Project_Utilities:
         else:
             raise ValueError(f"User '{username}' is not in project {project_name}.")
 
-    # Name: update_user_role
-    # Description: Changes a user's role for a particular project
-    # Input
-    #   project_name: The name of the project that the role change is occurring in 
-    #   username: The username of the user whose role is changing
-    #   new_role: The new role (OWNER, MEMBER, GUEST) of the user
+    @staticmethod
     def update_user_role(project_name: str, username: str, new_role: str):
+        """
+        Changes a user's role for a particular project.
+
+        Args:
+            project_name (str): The name of the project where the role change is occurring.
+            username (str): The username of the user whose role is changing.
+            new_role (str): The new role (OWNER, MEMBER, GUEST) of the user.
+
+        Raises:
+            ValueError: If the user is not found in the project or there is an error updating the role.
+        """
         if Account_Utilities.user_has_project(username, project_name):
             with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
                 serialized_project = project_data[project_name][()]
@@ -234,12 +315,18 @@ class Project_Utilities:
         else:
             raise ValueError(f"User '{username}' is not in project {project_name}.")
 
-    # Name: remove_collaborator
-    # Description: Removes a user as a collaborator for a project
-    # Input:
-    #   project_name: The name of the project that the user is being removed from 
-    #   collaborator: The username of the user being removed
+    @staticmethod
     def remove_collaborator(project_name: str, collaborator: str):
+        """
+        Removes a user as a collaborator from a project.
+
+        Args:
+            project_name (str): The name of the project the user is being removed from.
+            collaborator (str): The username of the collaborator being removed.
+
+        Raises:
+            ValueError: If the project is not found or there is an error removing the collaborator.
+        """
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             if project_name not in project_data:
                 raise ValueError(f"Project '{project_name}' not found.")
@@ -255,15 +342,18 @@ class Project_Utilities:
 
             Account_Utilities.remove_project(project_name, collaborator)
 
-
-
-
-
     #################################################
     # THE FOLLOWING FUNCTION IS TO RESET THE DATABASE
     #################################################
 
+    @staticmethod
     def reset():
+        """
+        Resets the database by initializing sample projects, tasks, categories, and collaborators.
+
+        This function creates multiple projects with sample tasks and categories for testing purposes.
+        """
+
         project_data = h5py.File('/app/database/project_data.hdf5', 'w')
 
         #################
