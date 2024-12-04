@@ -349,8 +349,6 @@ def display_tasks():
         role = response.json()
 
     st.sidebar.markdown("---")
-
-    st.sidebar.text("Hello world")
     
     display_priority_color_code()
 
