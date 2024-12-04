@@ -1,58 +1,211 @@
-/* General button styles */
-button {
-    color: white !important; /* Force white text */
-    border-radius: 5px !important; /* Optional, for rounded corners */
+/* Back Button */
+.st-key-Back button:hover {
+    background-color: gold;
+    border: none;
 }
 
-button:hover {
-    background-color: gold !important;
-    color: black !important; /* Force black text */
-    border: 2px solid gold !important; /* Gold border on hover */
+.st-key-Back button:hover p {
+    color: black;
 }
 
-button:focus {
-    background-color: gold !important;
-    color: black !important; /* Force black text */
-    border: 2px solid gold !important; /* Gold border on focus */
+.st-key-Back button:focus {
+    color: gold;
 }
 
-/* Specific fix for Streamlit buttons */
-div.stButton > button {
-    color: white !important; /* Ensure text is white */
+.st-key-Back button:focus p {
+    color: black;
 }
 
-div.stButton > button:hover {
-    background-color: gold !important;
-    color: black !important;
-    border: 2px solid gold !important; /* Gold border on hover */
+/* Logout Button */
+.st-key-Logout button {
+    background-color: gold;
+    color: black;
 }
 
-div.stButton > button:focus {
-    background-color: gold !important;
-    color: black !important;
-    border: 2px solid gold !important; /* Gold border on focus */
+.st-key-Logout button:hover {
+    background-color: red;
+    border: none;
 }
 
-/* Styles for select boxes */
-div.stSelectbox {
-    background-color: black !important;
-    color: white !important;
+.st-key-Logout button:hover p {
+    color: black;
 }
 
-div.stSelectbox:hover {
-    background-color: gold !important;
-    color: black !important;
-    border: 2px solid gold !important; /* Gold border on hover */
+.st-key-Logout button:focus {
+    color: red;
 }
 
-div.stSelectbox:focus-within {
-    background-color: gold !important;
-    color: black !important;
-    border: 2px solid gold !important; /* Gold border on focus */
+.st-key-Logout button:focus p {
+    color: black;
 }
 
-/* Styles for radio buttons */
-div.stRadio {
-    color: white !important;
+/* Signup Button */
+.st-key-SignUp button:hover {
+    background-color: gold;
+    border: none;
 }
 
+.st-key-SignUp button:hover p {
+    color: black;
+}
+
+.st-key-SignUp button:focus {
+    color: gold;
+}
+
+.st-key-SignUp button:focus p {
+    color: black;
+}
+
+/* Team Settings Button */
+.st-key-TeamSet button:hover {
+    background-color: gold;
+    border: none;
+}
+
+.st-key-TeamSet button:hover p {
+    color: black;
+}
+
+.st-key-TeamSet button:focus {
+    color: gold;
+}
+
+.st-key-TeamSet button:focus p {
+    color: black;
+}
+
+/* Task Management Button */
+.st-key-TaskMan button:hover {
+    background-color: gold;
+    border: none;
+}
+
+.st-key-TaskMan button:hover p {
+    color: black;
+}
+
+.st-key-TaskMan button:focus {
+    color: gold;
+}
+
+.st-key-TaskMan button:focus p {
+    color: black;
+}
+
+/* Login Button */
+.st-key-Login button:hover {
+    background-color: gold;
+    border: none;
+}
+
+.st-key-Login button:hover p {
+    color: black;
+}
+
+.st-key-Login button:focus {
+    color: gold;
+}
+
+.st-key-Login button:focus p {
+    color: black;
+}
+
+.st-key-Projects1 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects2 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects3 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects4 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects5 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-key-Projects6 button:hover {
+    background-color: gold;
+    border: none;
+    color: black;
+}
+
+.st-b6 {
+    border-bottom-color: rgb(251, 215, 0);
+  }
+  
+  .st-b4 {
+    border-right-color: rgb(251, 215, 0);
+  }
+  .st-b5 {
+    border-top-color: rgb(251, 215, 0);
+  }
+  
+  .st-b3 {
+    border-left-color: rgb(251, 215, 0);
+  }
+
+.st-emotion-cache-19cfm8f {
+    display: flex;
+    flex-flow: row;
+    -moz-box-align: center;
+    align-items: center;
+    height: 2.5rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(251, 215, 0);
+    transition-duration: 200ms;
+    transition-property: border;
+    transition-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition-duration: 200ms;
+  }
+  
+.st-emotion-cache-15hul6a:hover {
+    
+    border-color: rgb(251, 215, 0);
+    color: rgb(0, 0, 0);
+    background-color: rgb(251, 215, 0);
+
+  }
+
+.st-cd {
+    border-left-color: rgb(251, 215, 0);
+  }
+  
+  .st-ce {
+    border-right-color: rgb(251, 215, 0);
+  }
+  
+  .st-cg {
+    border-bottom-color: rgb(251, 215, 0);
+  }
+  
+  .st-cf {
+    border-top-color: rgb(251, 215, 0);
+  }
+  
+.st-emotion-cache-lpgk4i:hover {
+    border-color: rgb(251, 215, 0);
+    color: rgb(0, 0, 0);
+    background-color: rgb(251, 215, 0);
+  }
+  
