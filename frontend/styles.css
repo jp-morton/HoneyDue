@@ -1,148 +1,58 @@
-/* Back Button */
-.st-key-Back button:hover {
-    background-color: gold;
-    border: none;
+/* General button styles */
+button {
+    color: white !important; /* Force white text */
+    border-radius: 5px !important; /* Optional, for rounded corners */
 }
 
-.st-key-Back button:hover p {
-    color: black;
+button:hover {
+    background-color: gold !important;
+    color: black !important; /* Force black text */
+    border: 2px solid gold !important; /* Gold border on hover */
 }
 
-.st-key-Back button:focus {
-    color: gold;
+button:focus {
+    background-color: gold !important;
+    color: black !important; /* Force black text */
+    border: 2px solid gold !important; /* Gold border on focus */
 }
 
-.st-key-Back button:focus p {
-    color: black;
+/* Specific fix for Streamlit buttons */
+div.stButton > button {
+    color: white !important; /* Ensure text is white */
 }
 
-/* Logout Button */
-.st-key-Logout button {
-    background-color: gold;
-    color: black;
+div.stButton > button:hover {
+    background-color: gold !important;
+    color: black !important;
+    border: 2px solid gold !important; /* Gold border on hover */
 }
 
-.st-key-Logout button:hover {
-    background-color: red;
-    border: none;
+div.stButton > button:focus {
+    background-color: gold !important;
+    color: black !important;
+    border: 2px solid gold !important; /* Gold border on focus */
 }
 
-.st-key-Logout button:hover p {
-    color: black;
+/* Styles for select boxes */
+div.stSelectbox {
+    background-color: black !important;
+    color: white !important;
 }
 
-.st-key-Logout button:focus {
-    color: red;
+div.stSelectbox:hover {
+    background-color: gold !important;
+    color: black !important;
+    border: 2px solid gold !important; /* Gold border on hover */
 }
 
-.st-key-Logout button:focus p {
-    color: black;
+div.stSelectbox:focus-within {
+    background-color: gold !important;
+    color: black !important;
+    border: 2px solid gold !important; /* Gold border on focus */
 }
 
-/* Signup Button */
-.st-key-SignUp button:hover {
-    background-color: gold;
-    border: none;
+/* Styles for radio buttons */
+div.stRadio {
+    color: white !important;
 }
 
-.st-key-SignUp button:hover p {
-    color: black;
-}
-
-.st-key-SignUp button:focus {
-    color: gold;
-}
-
-.st-key-SignUp button:focus p {
-    color: black;
-}
-
-/* Team Settings Button */
-.st-key-TeamSet button:hover {
-    background-color: gold;
-    border: none;
-}
-
-.st-key-TeamSet button:hover p {
-    color: black;
-}
-
-.st-key-TeamSet button:focus {
-    color: gold;
-}
-
-.st-key-TeamSet button:focus p {
-    color: black;
-}
-
-/* Task Management Button */
-.st-key-TaskMan button:hover {
-    background-color: gold;
-    border: none;
-}
-
-.st-key-TaskMan button:hover p {
-    color: black;
-}
-
-.st-key-TaskMan button:focus {
-    color: gold;
-}
-
-.st-key-TaskMan button:focus p {
-    color: black;
-}
-
-/* Login Button */
-.st-key-Login button:hover {
-    background-color: gold;
-    border: none;
-}
-
-.st-key-Login button:hover p {
-    color: black;
-}
-
-.st-key-Login button:focus {
-    color: gold;
-}
-
-.st-key-Login button:focus p {
-    color: black;
-}
-
-.st-key-Projects1 button:hover {
-    background-color: gold;
-    border: none;
-    color: black;
-}
-
-.st-key-Projects2 button:hover {
-    background-color: gold;
-    border: none;
-    color: black;
-}
-
-.st-key-Projects3 button:hover {
-    background-color: gold;
-    border: none;
-    color: black;
-}
-
-.st-key-Projects4 button:hover {
-    background-color: gold;
-    border: none;
-    color: black;
-}
-
-.st-key-Projects5 button:hover {
-    background-color: gold;
-    border: none;
-    color: black;
-}
-
-.st-key-Projects6 button:hover {
-    background-color: gold;
-    border: none;
-    color: black;
-}
