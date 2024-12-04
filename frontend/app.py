@@ -207,8 +207,8 @@ def display_calendar():
 
     # Ensure state is defined before accessing it
     if state:
-        if state.get("eventClick"):
-            st.write("Selected Event Details:", state["eventClick"])
+        # if state.get("eventClick"):
+        #     st.write("Selected Event Details:", state["eventClick"])
 
         if state.get("eventsSet"):
             st.session_state["events"] = state["eventsSet"]
