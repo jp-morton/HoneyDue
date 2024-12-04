@@ -150,7 +150,6 @@ def display_projects():
 
 # Function to display project view 
 
-
 def display_calendar():
     # Initialize state to avoid UnboundLocalError
     state = {}
@@ -320,8 +319,6 @@ def display_priority_color_code():
             unsafe_allow_html=True
         )
 
-
-
 def display_tasks():
     st.subheader(f"{st.session_state.project_name} Homepage")
 
@@ -352,6 +349,8 @@ def display_tasks():
         role = response.json()
 
     st.sidebar.markdown("---")
+
+    st.sidebar.text("Hello world")
     
     display_priority_color_code()
 
@@ -359,35 +358,6 @@ def display_tasks():
     display_calendar()
 
 # Function to display tasks and add new tasks
-
-# Function to display task management page 
-def display_tasks():
-    st.subheader(f"{st.session_state.project_name} Homepage")
-
-    if st.sidebar.button("Logout", key= 'Logout'):
-        st.session_state.clear()
-        st.rerun()
-
-    st.sidebar.markdown("---")
-
-    if st.sidebar.button("Back", key= 'Back'):
-        del st.session_state.project_name
-        st.rerun()
-
-    if st.sidebar.button("Team Settings", key= 'TeamSet'):
-            st.session_state["team_settings"] = True
-            st.rerun()
-
-    if st.sidebar.button("Manage Tasks", key= 'TaskMan'):
-        st.session_state["task_list"] = True
-        st.rerun()
-
-    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
-    if response.status_code == 200:
-        role = response.json()
-
-    # CALENDAR PLACEHOLDER
-    calendar()
 
 def display_task_list():
 
