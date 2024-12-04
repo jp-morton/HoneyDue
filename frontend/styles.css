@@ -148,15 +148,35 @@
 }
 
 .st-b6 {
-    
-    border-bottom-color: rgb(251, 215, 0);
     border-bottom-color: rgb(251, 215, 0);
   }
   
   .st-b4 {
-   
     border-right-color: rgb(251, 215, 0);
-    border-right-color: rgb(251, 215, 0);
+  }
+  .st-b5 {
+    border-top-color: rgb(251, 215, 0);
+  }
+  
+  .st-b3 {
+    border-left-color: rgb(251, 215, 0);
+  }
+
+.st-emotion-cache-19cfm8f {
+    display: flex;
+    flex-flow: row;
+    -moz-box-align: center;
+    align-items: center;
+    height: 2.5rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(251, 215, 0);
+    transition-duration: 200ms;
+    transition-property: border;
+    transition-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition-duration: 200ms;
   }
   
 .st-emotion-cache-15hul6a:hover {
@@ -165,5 +185,22 @@
     color: rgb(0, 0, 0);
     background-color: rgb(251, 215, 0);
 
+  }
+
+
+.st-cd {
+    border-left-color: rgb(251, 215, 0);
+  }
+  
+  .st-ce {
+    border-right-color: rgb(251, 215, 0);
+  }
+  
+  .st-cg {
+    border-bottom-color: rgb(251, 215, 0);
+  }
+  
+  .st-cf {
+    border-top-color: rgb(251, 215, 0);
   }
   
