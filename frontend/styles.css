@@ -206,7 +206,8 @@ div.stDataFrameGlideDataEditor:nth-child(1) {
  
   color: rgb(251, 215, 0);
   color: rgb(251, 215, 0);
-}
+  }
+
 
 div.stDataFrameGlideDataEditor:nth-child(1) {
   
@@ -379,48 +380,21 @@ body {
   }
   
   
-
-  
-.fc-scrollgrid-sync-table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) {
-  
-    border-color: rgb(251, 215, 0);
-  }
-  
-  .fc-scrollgrid-sync-table > tbody:nth-child(2) > tr:nth-child(5) > td:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) {
-    
-    border-color: rgb(251, 0, 0);
-  }
-  
-
-  .fc-scrollgrid-sync-table > tbody:nth-child(2) > tr:nth-child(4) > td:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) {
-   
-    border-color: rgb(243, 215, 61);
-  }
-  
-
-  .fc-scrollgrid-sync-table > tbody:nth-child(2) > tr:nth-child(5) > td:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) {
-    
-    border-color: rgb(243, 223, 61);
-  }
-  
-
-  .fc-scrollgrid-sync-table > tbody:nth-child(2) > tr:nth-child(4) > td:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) {
-    
-    border-color: rgb(243, 223, 61);
-  }
+.st-emotion-cache-1u2dcfn {
  
-  .fc-scrollgrid-sync-table > tbody:nth-child(2) > tr:nth-child(5) > td:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) {
-  
-    border-color: rgb(251, 0, 0);
-  }
-  
-  .fc-scrollgrid-sync-table > tbody:nth-child(2) > tr:nth-child(3) > td:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) {
-   
-    border-color: rgb(0, 0, 251);
-  }
-  
-  .fc-scrollgrid-sync-table > tbody:nth-child(2) > tr:nth-child(6) > td:nth-child(7) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > a:nth-child(1) > div:nth-child(1) {
-    
-    border-color: rgb(0, 251, 0);
-  }
-  
+  vertical-align: middle;
+  overflow: hidden;
+  color: inherit;
+  fill: currentcolor;
+  display: inline-flex;
+  -moz-box-align: center;
+  align-items: center;
+  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+  flex-shrink: 0;
+  height: 1.2rem;
+  height: 1.2rem;
+  width: 1.2rem;
+}
