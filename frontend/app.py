@@ -73,14 +73,17 @@ def display_signup():
 
         # Signup button is selected 
         if st.form_submit_button("Sign Up"):
-            if verify_password == password:
-                signup_attempt = signup(username, password, verify_password)
-                if signup_attempt.ok:
-                    st.success("Account created successfully! Please log in.")
+            if username and password and verify_password:
+                if verify_password == password:
+                    signup_attempt = signup(username, password, verify_password)
+                    if signup_attempt.ok:
+                        st.success("Account created successfully! Please log in.")
+                    else:
+                        st.error("Account with this username already exists.")
                 else:
-                    st.error("Account with this username already exists.")
+                    st.error("Passwords mismatch")
             else:
-                st.error("Passwords mismatch")
+                st.error("All fields must be filled.")
     
     # Add "Back" button to return to home page
     if st.sidebar.button("Back", key = 'Back'):
@@ -230,6 +233,12 @@ def display_task_list():
                             st.error("Please enter a task name")
                         elif not task_description:
                             st.error("Please enter a task description")
+                        elif not category:
+                            st.error("Please select a category")
+                        elif not status:
+                            st.error("Please select a status")
+                        elif not assignee:
+                            st.error("Please select an assignee")
                         else:
                             if assignee == "Assign to me":
                                 assignee = st.session_state.username
@@ -246,17 +255,15 @@ def display_task_list():
                                 "assignee": assignee
                             }
 
-                        # Send the task data to the backend 
-                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", json=task_data)
-                        if response.status_code == 200:
-                            st.rerun()
-                            st.success(f'Task "{task_name}" added!')
-                        else:
-                            st.error(f"Error: {response.text}")
+                            # Send the task data to the backend 
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", json=task_data)
+                            if response.status_code == 200:
+                                st.rerun()
+                                st.success(f'Task "{task_name}" added!')
+                            else:
+                                st.error(f"Error: {response.text}")
 
-        # Creating a category (OWNER AND MEMBER ONLY)
-        if role != "Guest":
-            
+            # Creating a category (OWNER AND MEMBER ONLY)
             with st.sidebar.form("Add", clear_on_submit=True, border=False):
 
                     category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed" )
@@ -281,14 +288,15 @@ def display_task_list():
         if response.status_code == 200:
             task_list = response.json()
 
-    # Task table for MEMBERS and OWNERS
-    if len(task_list) != 0 and role != "Guest":        
         # Get category list
         response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
         if response.status_code == 200:
             category_list = response.json()
             filtered_category_list = category_list.copy()
             filtered_category_list.remove("None")
+
+    # Task table for MEMBERS and OWNERS
+    if role != "Guest":
 
         # Get list of assignees
         response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
@@ -341,19 +349,23 @@ def display_task_list():
                         st.error(f"Failed to save data. Status code: {update_response.status_code}")
             else:
                 st.warning("No changes were made to the tasks")
-    
-        # Display categories  
-        i = 1
-        for category in filtered_category_list:
-            st.sidebar.write(f"{i}. {category}")
-            i = i + 1
+    else:
+        # Task dataframe (view only) for guests
+        st.dataframe(task_list, use_container_width=True)
 
+    # Display categories  
+    i = 1
+    for category in filtered_category_list:
+        st.sidebar.write(f"{i}. {category}")
+        i = i + 1
+
+    if role != "Guest":
         # Ability to remove categories 
         with st.sidebar.form("Category", clear_on_submit=True, border=False):
             with st.expander("Remove a Category"):
                 selected_category = st.selectbox(f"Remove Category", filtered_category_list, index=None, placeholder="Category to Remove", label_visibility="collapsed")
                 if st.form_submit_button("Remove"):
-                    if selected_category != 'Select a category':
+                    if selected_category != None:
                         response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
                         if response.status_code == 200:
                             st.rerun()
@@ -362,10 +374,6 @@ def display_task_list():
                             st.error("Error occurred while removing category.")
                     else:
                         st.error("Please select a category.")
-    elif role == "Guest" or len(task_list) == 0:
-        st.subheader("\n\nThere are no tasks to display.")
-        
-    
     
 # Function to display team settings
 def display_team_settings():
