@@ -137,8 +137,7 @@ def display_projects():
             project_list = response.json()
             i = 1
             for project in project_list:
-                # Add a button for each project 
-                if st.button(f"{i}. {project}"):
+                if st.button(f"{i}. {project}", key= f"Projects{i}"):
                     st.session_state.project_name = project
                     st.rerun()
                 i = i + 1
@@ -265,8 +264,8 @@ def display_task_list():
 
             # Creating a category (OWNER AND MEMBER ONLY)
             with st.sidebar.form("Add", clear_on_submit=True, border=False):
-
-                    category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed" )
+                
+                    category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed")
 
                     # Button to create a new category 
                     if st.form_submit_button("Add"):
