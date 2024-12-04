@@ -6,6 +6,10 @@ import requests
 import pathlib
 from datetime import datetime
 
+import streamlit as st
+st.set_page_config(layout="wide")
+
+
 API_URL = "http://backend:8000"
 
 # Function to load CSS from folder
