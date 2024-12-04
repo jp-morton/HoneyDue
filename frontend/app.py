@@ -67,7 +67,7 @@ def display_signup():
     st.subheader("Sign Up")
     with st.form("Sign Up", clear_on_submit=True, border=False):
         # User inputs for username, password, and password verification 
-        username = st.text_input("Create Username", placeholder= "New User", label_visibility="collapsed")
+        username = st.text_input("Create Username", placeholder= "Create Username", label_visibility="collapsed")
         password = st.text_input("Create Password", type="password", placeholder="Create Password", label_visibility="collapsed")
         verify_password = st.text_input("Confirm Password", type="password", placeholder="Confirm Password", label_visibility="collapsed")
 
