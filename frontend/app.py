@@ -343,6 +343,34 @@ def display_tasks():
 
 # Function to display tasks and add new tasks
 
+def display_tasks():
+    st.subheader(f"{st.session_state.project_name} Homepage")
+
+    if st.sidebar.button("Logout", key= 'Logout'):
+        st.session_state.clear()
+        st.rerun()
+
+    st.sidebar.markdown("---")
+
+    if st.sidebar.button("Back", key= 'Back'):
+        del st.session_state.project_name
+        st.rerun()
+
+    if st.sidebar.button("Team Settings", key= 'TeamSet'):
+            st.session_state["team_settings"] = True
+            st.rerun()
+
+    if st.sidebar.button("Manage Tasks", key= 'TaskMan'):
+        st.session_state["task_list"] = True
+        st.rerun()
+
+    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
+    if response.status_code == 200:
+        role = response.json()
+
+    # CALENDAR PLACEHOLDER
+    calendar()
+
 def display_task_list():
 
     # Log out button
@@ -480,7 +508,7 @@ def display_task_list():
         }
 
         sort_by = st.selectbox("Sort Tasks", placeholder="Sort Tasks", options=df.columns.tolist(), index=0, label_visibility="collapsed")
-        sort_order = st.radio("Task order", options=["Ascending", "Descending"], index=0)
+        sort_order = st.radio("Task order", options=["Ascending", "Descending"], index=0, key='Radio')
         ascending = True if sort_order == "Ascending" else False
         df_sorted = df.sort_values(by=sort_by, ascending=ascending)
         df_sorted_reset = df_sorted.reset_index(drop=True)
