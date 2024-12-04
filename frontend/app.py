@@ -156,10 +156,10 @@ def display_calendar():
 
         priority_color_map  = {
             1: "#FF0000",  # Red for priority 1 (highest)
-            2: "#FFA500",  # Orange for priority 2
-            3: "#FFFF00",  # Yellow for priority 3
-            4: "#90EE90",  # Light Green for priority 4
-            5: "#008000",  # Green for priority 5 (lowest)
+            2: "#FFFF00",  # Yellow for priority 2
+            3: "#01FF23",  # Yellow for priority 3
+            4: "#3301FF",  # Blue for priority 4
+            5: "#F601FF",  # Green for priority 5 (lowest)
         }
 
 
@@ -214,7 +214,7 @@ def display_calendar():
             st.session_state["events"] = state["eventsSet"]
 
         # Debugging output for state
-        st.write("Calendar State:", state)
+        # st.write("Calendar State:", state)
 
 # def display_calendar():
 #     # Fetch tasks from the backend
@@ -290,10 +290,10 @@ def display_priority_color_code():
     # Define colors for different priorities
     priority_color_map = {
         1: "#FF0000",  # Red for priority 1 (highest)
-        2: "#FFA500",  # Orange for priority 2
-        3: "#FFFF00",  # Yellow for priority 3
-        4: "#90EE90",  # Light Green for priority 4
-        5: "#008000",  # Green for priority 5 (lowest)
+        2: "#FFFF00",  # Yellow for priority 2
+        3: "#01FF23",  # Green for priority 3
+        4: "#3301FF",  # Blue for priority 4
+        5: "#F601FF",  # Purple for priority 5 (lowest)
     }
 
     st.sidebar.subheader("Priority Color Code")
