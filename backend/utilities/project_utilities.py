@@ -25,6 +25,17 @@ class Project_Utilities:
         with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
             serialized_project = pickle.dumps(project)
             project_data.create_dataset(project.name, data=np.void(serialized_project))
+    
+    @staticmethod
+    def delete_project(project_name: str):
+        """
+        Deletes a project from the database.
+        
+        Args:
+            project_name (str): The name of the proejct to be deleted.
+        """
+        with h5py.File('/app/database/project_data.hdf5', 'a') as project_data:
+            del project_data[project_name]
 
     @staticmethod
     def project_exists(project_name: str):
@@ -340,7 +351,7 @@ class Project_Utilities:
             del project_data[project_name]
             project_data.create_dataset(project_name, data=np.void(serialized_project))
 
-            Account_Utilities.remove_project(project_name, collaborator)
+            Account_Utilities.delete_project(project_name, collaborator)
 
     #################################################
     # THE FOLLOWING FUNCTION IS TO RESET THE DATABASE

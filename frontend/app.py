@@ -84,7 +84,7 @@ def display_signup():
                     if signup_attempt.ok:
                         st.success("Account created successfully! Please log in.")
                     else:
-                        st.error("Account with this username already exists.")
+                        st.error("An account with this username or password already exists.")
                 else:
                     st.error("Passwords mismatch")
             else:
@@ -101,7 +101,7 @@ def display_signup():
         st.rerun()
 
 # Function to display projects and add new projects
-def display_projects():
+def display_project_list():
 
     display_company_logo()
 
@@ -319,7 +319,7 @@ def display_priority_color_code():
             unsafe_allow_html=True
         )
 
-def display_tasks():
+def display_project_home():
     st.subheader(f"{st.session_state.project_name} Homepage")
 
     # Logout button 
@@ -344,20 +344,33 @@ def display_tasks():
         st.session_state["task_list"] = True
         st.rerun()
 
-    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
-    if response.status_code == 200:
-        role = response.json()
-
     st.sidebar.markdown("---")
     
     display_priority_color_code()
 
-    # CALENDAR PLACEHOLDER
+    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name, "username": st.session_state.username})
+    if response.status_code == 200:
+        user_role = response.json()
+    else:
+        user_role = "Error"
+
+    # Delete project button (OWNERS ONLY)
+    if user_role == "Owner":
+        st.sidebar.markdown("---")
+
+        if st.sidebar.button("Delete Project"):
+            response = requests.post(f"{API_URL}/{st.session_state.username}/delete_project", params={"project_name": st.session_state.project_name})
+            if response.status_code == 200:
+                st.sidebar.success(f'Project "{st.session_state.project_name}" has been deleted.')
+                del st.session_state.project_name
+                st.rerun()
+
+    # Display the task calendar
     display_calendar()
 
 # Function to display tasks and add new tasks
 
-def display_task_list():
+def display_task_management():
 
     # Log out button
     if st.sidebar.button("Logout", key= 'Logout'):
@@ -376,6 +389,57 @@ def display_task_list():
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
     if response.status_code == 200:
         role = response.json()
+
+    # Get category list
+    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
+    if response.status_code == 200:
+        category_list = response.json()
+        filtered_category_list = category_list.copy()
+        filtered_category_list.remove("None")
+
+    if role != "Guest":
+            
+        with st.sidebar.form("Add", clear_on_submit=True, border=False):
+            st.subheader("Add Category")
+            category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed")
+
+            if st.form_submit_button("Add"):
+                if category_entry:
+                    if category_entry in category_list:
+                        st.error(f"Category '{category_entry}' already exists")
+                    else:
+                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
+                        if response.status_code == 200:
+                            st.rerun()
+                            st.success(f'Category "{category_entry}" added!')
+                        else:
+                            st.error("There was an error adding the category")
+                else:
+                    st.error("Please enter a category name")
+
+    st.sidebar.subheader("Categories")
+    if len(filtered_category_list) > 0:
+        i = 1
+        for category in filtered_category_list:
+            st.sidebar.write(f"{i}. {category}")
+            i = i + 1
+    else:
+        st.sidebar.write("There are no categories to display.")
+
+    if role != "Guest" and len(filtered_category_list) > 0:
+            with st.sidebar.form("Category", clear_on_submit=True, border=False):
+                with st.expander("Remove a Category"):
+                    selected_category = st.selectbox(f"Remove Category", filtered_category_list, index=None, placeholder="Category to Remove", label_visibility="collapsed")
+                    if st.form_submit_button("Remove"):
+                        if selected_category != 'Select a category':
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
+                            if response.status_code == 200:
+                                st.rerun()
+                                st.success(f"Category has been removed.")
+                            else:
+                                st.error("Error occurred while removing category.")
+                        else:
+                            st.error("Please select a category.")
 
     # COL2 OF TASKS PAGE
     if "tasks" not in st.session_state:
@@ -434,121 +498,79 @@ def display_task_list():
                         else:
                             st.error(f"Error: {response.text}")
 
-   
-        if role != "Guest":
-            
-            with st.sidebar.form("Add", clear_on_submit=True, border=False):
-                
-                    category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed")
-
-                    if st.form_submit_button("Add"):
-                        if category_entry:
-                            if category_entry in category_list:
-                                st.error(f"Category '{category_entry}' already exists")
-                            else:
-                                response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
-                                if response.status_code == 200:
-                                    st.rerun()
-                                    st.success(f'Category "{category_entry}" added!')
-                                else:
-                                    st.error("There was an error adding the category")
-                        else:
-                            st.error("Please enter a category name")
-        
-        # Get user role
-        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
-        if response.status_code == 200:
-            role = response.json()
-
         # Get task list
         response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", params={"project_name": st.session_state.project_name})
         if response.status_code == 200:
             task_list = response.json()
 
-    if len(task_list) != 0 and role != "Guest":        
-        # Get category list
-        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
-        if response.status_code == 200:
-            category_list = response.json()
-            filtered_category_list = category_list.copy()
-            filtered_category_list.remove("None")
-
-        # List of Assignees
-        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
-        if response.status_code == 200:
-            collaborator_dict = response.json()
-            collaborator_list = list(collaborator_dict.keys())
-        
-        # Create dataframe
-        df = pd.DataFrame(task_list)
-        status_order = ["TODO", "DOING", "DONE"]
-        df["status"] = pd.Categorical(df["status"], categories=status_order, ordered=True)
-        df["deadline"] = pd.to_datetime(df["deadline"])
-        
-        column_config = {
-            "priority": st.column_config.SelectboxColumn(label="Task Priority", options=["1", "2", "3", "4", "5"],),
-            "category": st.column_config.SelectboxColumn(label="Category", options=category_list,),
-            "status": st.column_config.SelectboxColumn(label="Status", options=status_order),
-            "assignee": st.column_config.SelectboxColumn(label="Assignee", options=collaborator_list),
-            "deadline": st.column_config.DateColumn(label="Deadline"),
-        }
-
-        sort_by = st.selectbox("Sort Tasks", placeholder="Sort Tasks", options=df.columns.tolist(), index=0, label_visibility="collapsed")
-        sort_order = st.radio("Task order", options=["Ascending", "Descending"], index=0, key='Radio')
-        ascending = True if sort_order == "Ascending" else False
-        df_sorted = df.sort_values(by=sort_by, ascending=ascending)
-        df_sorted_reset = df_sorted.reset_index(drop=True)
-
-        edited_df = st.data_editor(df_sorted_reset, num_rows="dynamic", column_config=column_config, use_container_width=True)
-
-        # Update button
-        if st.button("Save"):
-            if edited_df is not None and not df_sorted_reset.equals(edited_df):
-                if edited_df.isnull().values.any() or (edited_df == "").values.any():
-                    st.error("All fields must be filled before updating")
-                else:
-                    edited_df["deadline"] = edited_df["deadline"].dt.strftime('%Y-%m-%d')
-                    payload = {
-                        "updated_tasks": edited_df.to_dict(orient="records"),
-                        "project_name": st.session_state.project_name
-                    }
-                    
-                    update_response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task_updates", json=payload)
-                    if update_response.status_code == 200:
-                        st.rerun()
-                        st.success("Data update saved successfully")
-                    else:
-                        st.error(f"Failed to save data. Status code: {update_response.status_code}")
-            else:
-                st.warning("No changes were made to the tasks")
-    
-        i = 1
-        for category in filtered_category_list:
-            st.sidebar.write(f"{i}. {category}")
-            i = i + 1
-
-        with st.sidebar.form("Category", clear_on_submit=True, border=False):
-            with st.expander("Remove a Category"):
-                selected_category = st.selectbox(f"Remove Category", filtered_category_list, index=None, placeholder="Category to Remove", label_visibility="collapsed")
-                if st.form_submit_button("Remove"):
-                    if selected_category != 'Select a category':
-                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
-                        if response.status_code == 200:
-                            st.rerun()
-                            st.success(f"Category has been removed.")
-                        else:
-                            st.error("Error occurred while removing category.")
-                    else:
-                        st.error("Please select a category.")
-    elif role == "Guest" or len(task_list) == 0:
+    if len(task_list) == 0:
         st.subheader("\n\nThere are no tasks to display.")
+    else:
+        if role != "Guest":
+
+            # List of Assignees
+            response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
+            if response.status_code == 200:
+                collaborator_dict = response.json()
+                collaborator_list = list(collaborator_dict.keys())
+            
+            # Create dataframe
+            df = pd.DataFrame(task_list)
+            status_order = ["TODO", "DOING", "DONE"]
+            df["status"] = pd.Categorical(df["status"], categories=status_order, ordered=True)
+            df["deadline"] = pd.to_datetime(df["deadline"])
+            
+            column_config = {
+                "priority": st.column_config.SelectboxColumn(label="Task Priority", options=["1", "2", "3", "4", "5"],),
+                "category": st.column_config.SelectboxColumn(label="Category", options=category_list,),
+                "status": st.column_config.SelectboxColumn(label="Status", options=status_order),
+                "assignee": st.column_config.SelectboxColumn(label="Assignee", options=collaborator_list),
+                "deadline": st.column_config.DateColumn(label="Deadline"),
+            }
+
+            sort_by = st.selectbox("Sort Tasks", placeholder="Sort Tasks", options=df.columns.tolist(), index=0, label_visibility="collapsed")
+            sort_order = st.radio("Task order", options=["Ascending", "Descending"], index=0, key='Radio')
+            ascending = True if sort_order == "Ascending" else False
+            df_sorted = df.sort_values(by=sort_by, ascending=ascending)
+            df_sorted_reset = df_sorted.reset_index(drop=True)
+
+            edited_df = st.data_editor(df_sorted_reset, num_rows="dynamic", column_config=column_config, use_container_width=True)
+
+            # Update button
+            if st.button("Save"):
+                if edited_df is not None and not df_sorted_reset.equals(edited_df):
+                    if edited_df.isnull().values.any() or (edited_df == "").values.any():
+                        st.error("All fields must be filled before updating")
+                    else:
+                        edited_df["deadline"] = edited_df["deadline"].dt.strftime('%Y-%m-%d')
+                        payload = {
+                            "updated_tasks": edited_df.to_dict(orient="records"),
+                            "project_name": st.session_state.project_name
+                        }
+                        
+                        update_response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task_updates", json=payload)
+                        if update_response.status_code == 200:
+                            st.rerun()
+                            st.success("Data update saved successfully")
+                        else:
+                            st.error(f"Failed to save data. Status code: {update_response.status_code}")
+                else:
+                    st.warning("No changes were made to the tasks")
         
+        else:
+            st.dataframe(task_list, use_container_width=True)
+
 # Function to display team settings
 def display_team_settings():
+    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
+    if response.status_code == 200:
+        collaborator_dict = response.json()
 
     col1, col2 = st.columns([4, 2])
     with col1:
         st.title(st.session_state.project_name + " Team Settings")
+        if collaborator_dict[st.session_state.username] == "Guest":
+            st.subheader("\n\nYou do not have permission to edit the team settings.")
     
     # Logout button 
     if st.sidebar.button("Logout", key= 'Logout'):
@@ -564,11 +586,8 @@ def display_team_settings():
     # Display team member list
     with st.sidebar:
         st.subheader("Team Members")
-        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
-        if response.status_code == 200:
-            collaborator_dict = response.json()
-            for collaborator, role in collaborator_dict.items():
-                st.write(f"{collaborator} : {role}")
+        for collaborator, role in collaborator_dict.items():
+            st.write(f"{collaborator} : {role}")
     
     # Collaborator management (OWNER ONLY)
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
@@ -722,11 +741,11 @@ def main():
         if "team_settings" in st.session_state:
             display_team_settings()
         elif "task_list" in st.session_state:
-                display_task_list()
+                display_task_management()
         else:
-            display_tasks()
+            display_project_home()
     elif st.session_state.logged_in:
-        display_projects()
+        display_project_list()
     elif st.session_state.page == "home":
         display_home()
     elif st.session_state.page == "login":

@@ -96,6 +96,31 @@ async def get_projects(username: str):
     project_list = Account_Utilities.get_project_list(username)
     return project_list
 
+@app.post("/{username}/delete_project")
+async def delete_project(project_name: str):
+    """
+    Endpoint to delete a project. 
+
+    Args:
+        project_name (str): The name of the project to be deleted.
+    
+    Returns:
+        dict: A JSON response with a success message if the project is deleted successfully.
+    
+    Raises:
+        HTTPException: Occurs if the project does not exist or if an error occurs during deletion 
+    """
+    try:
+        collaborator_list = Project_Utilities.get_collaborators(project_name)
+        if Project_Utilities.project_exists(project_name):
+            Project_Utilities.delete_project(project_name)
+
+            for user in collaborator_list.keys():
+                Account_Utilities.delete_project(project_name, user)
+            return {"message": "Project removed successfully"}
+    except:
+        raise HTTPException(status_code=400, detail="An error occured while deleting the project.")
+
 # Post to "{username}/{project_name}/task API endpoint"
 @app.post("/{username}/{project_name}/task", response_model=dict)
 async def add_task(request: Request):
