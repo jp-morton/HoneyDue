@@ -101,7 +101,7 @@ def display_signup():
         st.rerun()
 
 # Function to display projects and add new projects
-def display_projects():
+def display_project_list():
 
     display_company_logo()
 
@@ -319,7 +319,7 @@ def display_priority_color_code():
             unsafe_allow_html=True
         )
 
-def display_tasks():
+def display_project_home():
     st.subheader(f"{st.session_state.project_name} Homepage")
 
     # Logout button 
@@ -370,7 +370,7 @@ def display_tasks():
 
 # Function to display tasks and add new tasks
 
-def display_project_list():
+def display_task_management():
 
     # Log out button
     if st.sidebar.button("Logout", key= 'Logout'):
@@ -389,6 +389,57 @@ def display_project_list():
     response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
     if response.status_code == 200:
         role = response.json()
+
+    # Get category list
+    response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
+    if response.status_code == 200:
+        category_list = response.json()
+        filtered_category_list = category_list.copy()
+        filtered_category_list.remove("None")
+
+    if role != "Guest":
+            
+        with st.sidebar.form("Add", clear_on_submit=True, border=False):
+            st.subheader("Add Category")
+            category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed")
+
+            if st.form_submit_button("Add"):
+                if category_entry:
+                    if category_entry in category_list:
+                        st.error(f"Category '{category_entry}' already exists")
+                    else:
+                        response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
+                        if response.status_code == 200:
+                            st.rerun()
+                            st.success(f'Category "{category_entry}" added!')
+                        else:
+                            st.error("There was an error adding the category")
+                else:
+                    st.error("Please enter a category name")
+
+    st.sidebar.subheader("Categories")
+    if len(filtered_category_list) > 0:
+        i = 1
+        for category in filtered_category_list:
+            st.sidebar.write(f"{i}. {category}")
+            i = i + 1
+    else:
+        st.sidebar.write("There are no categories to display.")
+
+    if role != "Guest" and len(filtered_category_list) > 0:
+            with st.sidebar.form("Category", clear_on_submit=True, border=False):
+                with st.expander("Remove a Category"):
+                    selected_category = st.selectbox(f"Remove Category", filtered_category_list, index=None, placeholder="Category to Remove", label_visibility="collapsed")
+                    if st.form_submit_button("Remove"):
+                        if selected_category != 'Select a category':
+                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
+                            if response.status_code == 200:
+                                st.rerun()
+                                st.success(f"Category has been removed.")
+                            else:
+                                st.error("Error occurred while removing category.")
+                        else:
+                            st.error("Please select a category.")
 
     # COL2 OF TASKS PAGE
     if "tasks" not in st.session_state:
@@ -447,32 +498,6 @@ def display_project_list():
                         else:
                             st.error(f"Error: {response.text}")
 
-   
-        if role != "Guest":
-            
-            with st.sidebar.form("Add", clear_on_submit=True, border=False):
-                
-                    category_entry = st.text_input("Category: ", placeholder="Category", label_visibility="collapsed")
-
-                    if st.form_submit_button("Add"):
-                        if category_entry:
-                            if category_entry in category_list:
-                                st.error(f"Category '{category_entry}' already exists")
-                            else:
-                                response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name, "category_name": category_entry})
-                                if response.status_code == 200:
-                                    st.rerun()
-                                    st.success(f'Category "{category_entry}" added!')
-                                else:
-                                    st.error("There was an error adding the category")
-                        else:
-                            st.error("Please enter a category name")
-        
-        # Get user role
-        response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/role", params={"project_name": st.session_state.project_name})
-        if response.status_code == 200:
-            role = response.json()
-
         # Get task list
         response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/task", params={"project_name": st.session_state.project_name})
         if response.status_code == 200:
@@ -481,13 +506,7 @@ def display_project_list():
     if len(task_list) == 0:
         st.subheader("\n\nThere are no tasks to display.")
     else:
-        if role != "Guest":        
-            # Get category list
-            response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/category", params={"project_name": st.session_state.project_name})
-            if response.status_code == 200:
-                category_list = response.json()
-                filtered_category_list = category_list.copy()
-                filtered_category_list.remove("None")
+        if role != "Guest":
 
             # List of Assignees
             response = requests.get(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/collaborators", params={"project_name": st.session_state.project_name})
@@ -538,24 +557,6 @@ def display_project_list():
                 else:
                     st.warning("No changes were made to the tasks")
         
-            i = 1
-            for category in filtered_category_list:
-                st.sidebar.write(f"{i}. {category}")
-                i = i + 1
-
-            with st.sidebar.form("Category", clear_on_submit=True, border=False):
-                with st.expander("Remove a Category"):
-                    selected_category = st.selectbox(f"Remove Category", filtered_category_list, index=None, placeholder="Category to Remove", label_visibility="collapsed")
-                    if st.form_submit_button("Remove"):
-                        if selected_category != 'Select a category':
-                            response = requests.post(f"{API_URL}/{st.session_state.username}/{st.session_state.project_name}/remove_category", params={"project_name": st.session_state.project_name, "category": selected_category})
-                            if response.status_code == 200:
-                                st.rerun()
-                                st.success(f"Category has been removed.")
-                            else:
-                                st.error("Error occurred while removing category.")
-                        else:
-                            st.error("Please select a category.")
         else:
             st.dataframe(task_list, use_container_width=True)
 
@@ -740,11 +741,11 @@ def main():
         if "team_settings" in st.session_state:
             display_team_settings()
         elif "task_list" in st.session_state:
-                display_project_list()
+                display_task_management()
         else:
-            display_tasks()
+            display_project_home()
     elif st.session_state.logged_in:
-        display_projects()
+        display_project_list()
     elif st.session_state.page == "home":
         display_home()
     elif st.session_state.page == "login":
