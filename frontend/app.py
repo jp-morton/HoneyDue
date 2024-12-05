@@ -84,7 +84,7 @@ def display_signup():
                     if signup_attempt.ok:
                         st.success("Account created successfully! Please log in.")
                     else:
-                        st.error("Account with this username already exists.")
+                        st.error("An account with this username or password already exists.")
                 else:
                     st.error("Passwords mismatch")
             else:
