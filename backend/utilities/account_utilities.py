@@ -11,7 +11,7 @@ class Account_Utilities:
         add_user(username, password): Add a new user to the database.
         user_has_project(username, project_name): Check if a user has a specific project.
         add_project(project_name, username): Add a project to a user's project list.
-        remove_project(project_name, username): Remove a project from a user's project list.
+        delete_project(project_name, username): Remove a project from a user's project list.
         get_project_list(username): Retrieve a list of projects for a user.
         reset(): Reset the database to default values (used for testing).
     """
@@ -139,9 +139,9 @@ class Account_Utilities:
                 project_dataset[-1] = project_name.encode('utf-8')
             except:
                 raise ValueError(f"There was an error adding Project {project_name} to {username}")
-            
+
     @staticmethod
-    def remove_project(project_name: str, username: str):
+    def delete_project(project_name: str, username: str):
         """
         Remove a project from a user's project list.
 
