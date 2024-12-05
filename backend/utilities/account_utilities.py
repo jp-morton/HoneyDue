@@ -1,3 +1,4 @@
+import bcrypt
 import h5py
 
 class Account_Utilities:
@@ -11,7 +12,7 @@ class Account_Utilities:
         add_user(username, password): Add a new user to the database.
         user_has_project(username, project_name): Check if a user has a specific project.
         add_project(project_name, username): Add a project to a user's project list.
-        remove_project(project_name, username): Remove a project from a user's project list.
+        delete_project(project_name, username): Remove a project from a user's project list.
         get_project_list(username): Retrieve a list of projects for a user.
         reset(): Reset the database to default values (used for testing).
     """
@@ -50,8 +51,19 @@ class Account_Utilities:
         with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             for user in account_data:
                 user_group = account_data[user]
-                if user_group.attrs['Password'] == password:
-                    return True
+                stored_hash = user_group.attrs['Password']
+                
+                if isinstance(stored_hash, str): 
+                    stored_hash = stored_hash.encode('utf-8')
+                
+                password_encoded = password.encode('utf-8')
+
+                try:
+                    if bcrypt.checkpw(password_encoded, stored_hash):
+                        return True
+                except TypeError as e:
+                    print(f"Error checking password: {e}")
+                    return False
             return False
 
     @staticmethod
@@ -69,10 +81,17 @@ class Account_Utilities:
         with h5py.File('/app/database/account_data.hdf5', 'r') as account_data:
             try:
                 user_group = account_data[username]
-                if user_group.attrs['Password'] == password:
+                stored_hash = user_group.attrs['Password']
+                
+                if isinstance(stored_hash, str):
+                    stored_hash = stored_hash.encode('utf-8')
+
+                password_encoded = password.encode('utf-8')
+                
+                if bcrypt.checkpw(password_encoded, stored_hash):
                     return True
                 return False
-            except:
+            except KeyError:
                 return False
 
     @staticmethod
@@ -93,8 +112,10 @@ class Account_Utilities:
             elif Account_Utilities.password_exists(password):
                 raise ValueError("Password already exists.")
             else:
+                hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+                
                 user_group = account_data.create_group(username)
-                user_group.attrs['Password'] = password
+                user_group.attrs['Password'] = hashed_password  
                 user_group.create_dataset('Projects', shape=(0,), maxshape=(None,), dtype=h5py.string_dtype(encoding='utf-8'))
 
     #########################
@@ -139,9 +160,9 @@ class Account_Utilities:
                 project_dataset[-1] = project_name.encode('utf-8')
             except:
                 raise ValueError(f"There was an error adding Project {project_name} to {username}")
-            
+
     @staticmethod
-    def remove_project(project_name: str, username: str):
+    def delete_project(project_name: str, username: str):
         """
         Remove a project from a user's project list.
 
@@ -199,12 +220,10 @@ class Account_Utilities:
         Creates default users and assigns one project to each user.
         """
         with h5py.File('/app/database/account_data.hdf5', 'w') as account_data:
-            i = 1
-            while i <= 4:
-                user_group = account_data.create_group(f'user{i}')
-                user_group.attrs['Password'] = f'password{i}'
-                user_group.create_dataset('Projects', shape=(0,), maxshape=(None,), dtype=h5py.string_dtype(encoding='utf-8'))
-                i = i + 1
+            Account_Utilities.add_user('user1', 'password1')
+            Account_Utilities.add_user('user2', 'password2')
+            Account_Utilities.add_user('user3', 'password3')
+            Account_Utilities.add_user('user4', 'password4')
 
         Account_Utilities.add_project('Project1', 'user1')
         Account_Utilities.add_project('Project2', 'user2')
