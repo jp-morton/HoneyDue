@@ -691,7 +691,7 @@ def display_home():
     display_company_logo()
     
     # Centered the buttons to the screen
-    col1, col2, col3 = st.columns([.60,.50,1])
+    col1, col2, col3 = st.columns([0.9,.5,1])
     
     with col2:
         # Login button 
@@ -718,11 +718,12 @@ def display_company_logo():
             text-align: center;
             padding: 10px; /* Space around the title */             
         }
+
         </style>
         """,
         unsafe_allow_html=True
     ) 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns([1.5,1,1])
     with col2:
         st.image("https://i.pinimg.com/originals/fe/be/ca/febeca2f63bd56c127069bac2fff9323.jpg",width=200) 
     st.markdown('<div class="header-title">HoneyDue</div>', unsafe_allow_html=True)

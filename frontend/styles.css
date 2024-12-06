@@ -227,3 +227,13 @@
     height: 1.2rem;
     width: 1.2rem;
   }
+  
+.st-emotion-cache-p5msec:hover {
+    background-color: rgb(251,215,0);
+    color: rgb(251, 215, 0);
+  }
+  
+  .st-emotion-cache-p5msec:hover svg {
+    fill: rgb(251, 215, 0);
+  }
+  
