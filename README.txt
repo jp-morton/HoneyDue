@@ -1,5 +1,6 @@
-# Temporary README until i figure out how to actually use markdown
-LAST UPDATE: 26 SEP 2024
+This application was devloped in Ubuntu 22.04 using Python 3.10.
+If using a slightly different Ubuntu/Python setup your specific dependency versions 
+may vary. 
 
 Environment setup (for develoment only)
 -----------------
@@ -22,7 +23,9 @@ Your environment should now be properly configured.
 
 Running HoneyDue
 --------------------------------------
-As prerequisites for the following you will need to install the following:
+An Internet connection is required to proceed in order to download all necessary packages.
+
+As prerequisites for the following you will need to install:
 
 docker              https://docs.docker.com/engine/install/ubuntu/
 docker-compose      https://docs.docker.com/compose/install/linux/#install-using-the-repository
